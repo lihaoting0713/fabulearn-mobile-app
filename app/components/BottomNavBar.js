@@ -61,7 +61,10 @@ const BottomNavBar = () => {
                 />
                 <Text style={styles.navText}>學習包</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton}>
+            <TouchableOpacity style={styles.navButton}
+                onPress={() => 
+                handleNavigation('AccountStack')
+            }>
                 <Image 
                     style ={styles.accountIcon}
                     source={require('../pictures/Account Icon.png')}
