@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import BottomNavBar from './components/BottomNavBar';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
 
 
 
@@ -12,28 +10,6 @@ const ChallengeScreen = () => {
     const navigation = useNavigation();
     const [activePage, setActivePage] = useState(''); 
     const [showSearchBar, setShowSearchBar] = useState(false);
-    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
-
-
-    useEffect(() => {
-        const keyboardWillShowListener = Keyboard.addListener(
-            'keyboardWillShow',
-            () => {
-                setKeyboardVisible(true);
-            }
-        );
-        const keyboardWillHideListener = Keyboard.addListener(
-            'keyboardWillHide',
-            () => {
-                setKeyboardVisible(false);
-            }
-        );
-
-        return () => {
-            keyboardWillHideListener.remove();
-            keyboardWillShowListener.remove();
-        };
-    }, []);
     
 
     const Card = ({ title, count }) => {
@@ -55,15 +31,6 @@ const ChallengeScreen = () => {
     return (
         
         <SafeAreaView style={styles.cSContainer}>
-            <KeyboardAwareScrollView
-            contentContainerStyle={{ flexGrow: 1 }}
-            enableOnAndroid={true}
-            extraHeight={Platform.select({ ios: 20, android: 0 })}
-            extraScrollHeight={Platform.select({ ios: 20, android: -600 })}
-            keyboardOpeningTime={0}
-            enableAutomaticScroll={Platform.select({ ios: true, android: true })}
-            >
-              
             {activePage === '發起挑戰' ? (
                 <SafeAreaView style={styles.sCContainer}>
                 <View style={styles.sCHeader}>
@@ -88,7 +55,7 @@ const ChallengeScreen = () => {
                         />
                     </View>
                 )}
-                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                <ScrollView>
                   <View style={styles.inputContainer}>
                     <Text style={styles.label}>挑戰名稱</Text>
                     <TextInput
@@ -122,7 +89,7 @@ const ChallengeScreen = () => {
                     <TextInput
                       mode="outlined"
                       style={styles.input}
-                      
+                      right={<TextInput.Icon name="calendar" />}
                     />
                   </View>
                   <View style={styles.inputContainer}>
@@ -130,7 +97,7 @@ const ChallengeScreen = () => {
                     <TextInput
                       mode="outlined"
                       style={styles.input}
-                      
+                      right={<TextInput.Icon name="calendar" />}
                     />
                   </View>
                 
@@ -159,11 +126,7 @@ const ChallengeScreen = () => {
         </SafeAreaView>
             
     )}
-       
-       {!isKeyboardVisible && <BottomNavBar />}
-       
-       </KeyboardAwareScrollView>
-       
+        <BottomNavBar/>
         </SafeAreaView>
     
     );
@@ -175,9 +138,6 @@ const styles = StyleSheet.create({
     cSContainer: {
       flex: 1,
       backgroundColor: '#f5f5f7',
-    },
-    keyboardAvoidingView: {
-        flex: 1,
     },
     sCContainer: {
       flex: 1,
@@ -221,9 +181,6 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'center',
     },
-    scrollViewContent: {
-        flexGrow: 1,// Add padding to the bottom to prevent overlap with the bottom nav bar
-    },
     inputContainer: {
       marginBottom: 16,
     },
@@ -234,12 +191,8 @@ const styles = StyleSheet.create({
      
     },
     input: {
-        backgroundColor: '#FFF',
-        height: 45,
-        borderWidth: 1, // Reduce border width to make it thinner
-        borderRadius: 10, // Apply border radius to the input
-        borderColor: '#48bcbc', // Border color to match the theme
-        paddingLeft: 10,
+      backgroundColor: '#FFF',
+      flex: 1,
     },
     searchInput: {
         flex: 1,

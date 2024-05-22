@@ -1,6 +1,6 @@
 // BottomNavBar.js
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useNavigation} from '@react-navigation/native';
 import { useNavigationState } from '@react-navigation/native';
@@ -23,28 +23,49 @@ const BottomNavBar = () => {
             <TouchableOpacity style={styles.navButton} onPress={() => {
                     handleNavigation('HomeScreen')
             }}>
+                <Image 
+                    style ={styles.homeIcon}
+                    source={require('../pictures/Home Button.png')}
+                />
                 <Text style={styles.navText}>主頁</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton}>
+            <TouchableOpacity  style={styles.navButton} onPress={() => {
+                    handleNavigation('VideoLibrary')
+            }}>
+                <Image 
+                    style ={styles.filmIcon}
+                    source={require('../pictures/film Icon.png')}
+                />
                 <Text style={styles.navText}> 影片庫</Text>
             </TouchableOpacity>
             <View style={styles.challengeButtonContainer}>   
                 <TouchableOpacity 
                     style={[
-                        styles.navButton, 
                         styles.navButtonLarge, 
                         currentRoute === 'ChallengeScreen' ? styles.activeButton : null
                     ]}
                     onPress={() => 
                         handleNavigation('ChallengeScreen')
                 }>
+                <Image 
+                    style ={styles.gloveIcon}
+                    source={require('../pictures/glove.png')}
+                />
                 <Text style={styles.navTextLarge}>挑戰</Text>
                 </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.navButton}>
+                <Image 
+                    style ={styles.studyIcon}
+                    source={require('../pictures/study Icon.png')}
+                />
                 <Text style={styles.navText}>學習包</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.navButton}>
+                <Image 
+                    style ={styles.accountIcon}
+                    source={require('../pictures/Account Icon.png')}
+                />
                 <Text style={styles.navText}>賬戶</Text>
             </TouchableOpacity>
             </View>
@@ -73,13 +94,48 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         paddingTop: 0,
-        zIndex: 1,   
+        zIndex: 1,  
+        paddingHorizontal: 20, 
+    },
+
+    navButton:{
+        justifyContent: 'center',
+        alignItems: 'center',
+        width:60,
+        height:100,
+    },
+
+    homeIcon: {
+        width: 30,
+        height: 26,
       },
+    
+    filmIcon: {
+        width: 33,
+        height: 26,
+    },
+
+
+    gloveIcon: {
+        width:40,
+        height: 55,
+    },
+
+    studyIcon: {
+        width: 26,
+        height: 26,
+    },
+
+    accountIcon: {
+        
+        width: 26,
+        height: 26,
+    },
 
       navText: {
-        fontSize: 15,
+        fontSize: 12,
         color: 'white',
-        fontWeight: 'bold',
+        marginTop: 10,
       },
       
       navTextLarge: {
