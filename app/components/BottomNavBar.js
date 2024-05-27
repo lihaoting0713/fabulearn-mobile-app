@@ -11,6 +11,7 @@ const BottomNavBar = () => {
     const currentRoute = routeNames[routeNames.length - 1]; // This assumes a stack or similar navigator
 
     const handleNavigation = (screenName) => {
+        console.log(`Navigating to ${screenName}`); // Add logging
         navigation.navigate(screenName);
     };
     
@@ -61,10 +62,9 @@ const BottomNavBar = () => {
                 />
                 <Text style={styles.navText}>學習包</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.navButton}
-                onPress={() => 
-                handleNavigation('AccountStack')
-            }>
+            <TouchableOpacity style={styles.navButton} onPress={() => {
+                    handleNavigation('AccountStack')
+            }}>
                 <Image 
                     style ={styles.accountIcon}
                     source={require('../pictures/Account Icon.png')}
