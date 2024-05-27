@@ -14,7 +14,7 @@ function AccountScreen({navigation}) {
     { text: '筆記記錄', id: "note_records", icon: 'note', icontype: SimpleLineIcons, size: 30 , onPress: () => navigation.navigate('NoteRecordsNavigator')},
     { text: '獎章', id: "awards", icon: 'award', icontype: Feather, size: 30 , onPress: () => navigation.navigate('Awards')},
     { text: '關於APP', id: "aboutapp", icon: 'apps', icontype: Octicons, size: 30 , onPress: () => navigation.navigate('AboutApp')},
-    { text: '登出', id: "logout", icon: 'logout', icontype: AntDesign, size: 30 }
+    { text: '登出', id: "logout", icon: 'logout', icontype: AntDesign, size: 30 ,onPress: () => navigation.navigate('LogoutNavigator')},
   ]);
 
   return (

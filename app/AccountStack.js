@@ -11,6 +11,7 @@ import AboutApp from './Account/AboutApp';
 import Logout from './Account/Logout';
 import AccountSetting from './Account/Setting/AccountSetting';
 import Password from './Account/Setting/Password';
+import CreateAccount from './Account/CreateAccount';
 
 const MainStack = createNativeStackNavigator();
 const SettingStack = createNativeStackNavigator();
@@ -44,13 +45,22 @@ function CollectionRecordsNavigator() {
   }
 
 
-  function NoteRecordsNavigator() {
+function NoteRecordsNavigator() {
     return (
         <SettingStack.Navigator screenOptions={{headerShown:false}}>
             <SettingStack.Screen name="NoteRecords" component={NoteRecords} />
         </SettingStack.Navigator>
     );
-  }
+}
+
+function LogoutNavigator() {
+    return (
+        <SettingStack.Navigator screenOptions={{headerShown:false}}>
+            <SettingStack.Screen name="Logout" component={Logout} />
+            <SettingStack.Screen name="CreateAccount" component={CreateAccount} />
+        </SettingStack.Navigator>
+    );
+}
 
 
 function AccountStack() {
@@ -63,6 +73,7 @@ function AccountStack() {
                 <MainStack.Screen name="NoteRecordsNavigator" component={NoteRecordsNavigator} />
                 <MainStack.Screen name="Awards" component={Awards} />
                 <MainStack.Screen name="AboutApp" component={AboutApp} />
+                <MainStack.Screen name="LogoutNavigator" component={LogoutNavigator} />
             </MainStack.Navigator>
     );
 }

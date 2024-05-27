@@ -174,7 +174,6 @@ const styles = StyleSheet.create({
 
       activeButton: {
         backgroundColor: 'white', // Set the active button background to white
-        
     },
     
     
