@@ -1,0 +1,248 @@
+import {
+    StyleSheet,
+    Text,
+    View,
+    SafeAreaView,
+    ScrollView,
+    Image,
+    TouchableOpacity,
+    FlatList,
+    TextInput,
+    Modal,
+  } from "react-native";
+  import React, { useState } from "react";
+  import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+  import BottomNavBar from '../components/BottomNavBar';
+  import { useNavigation } from '@react-navigation/native';
+  import VideoList from './VideoLists';
+
+
+  function LanguageAwareness() {
+    const [showSearchBar, setShowSearchBar] = useState(false);
+    const [modalVisible, setModalVisible] = useState(false);
+    const navigation = useNavigation();
+
+    const handlePress = (sectionTitle) => {
+        navigation.navigate('VideoList', { sectionTitle });
+      };
+
+      const cardsData = [
+        {
+          title: 'Capitalisation',
+          watchedVideos: '0/3',
+          completedExercises: '3/9',
+          grade: 'P1 - F3',
+          icon: require('../pictures/Account Icon.png')
+        },
+        {
+            title: 'Punctuation (2)',
+            watchedVideos: '0/3',
+            completedExercises: '3/9',
+            grade: 'P1 - F3',
+            icon: require('../pictures/Account Icon.png')
+        },
+        
+      ];
+
+    return(
+        <SafeAreaView style={styles.lAContainer}>
+            <Ionicons name="search" size={30} style={{ opacity: 0 }} />
+             
+            <ScrollView style={styles.lAScrollViewContent}>
+                <View style={styles.lAHeader}>
+                    <TouchableOpacity onPress={() => navigation.goBack()}>
+                        <Text style={styles.lABackButton}>←</Text>
+                    </TouchableOpacity>
+                    {!showSearchBar && (
+                        <Text style={styles.lAHeaderText}>{`Capitalisation and\npunctuation`}</Text>
+                    )}
+                    <TouchableOpacity style={styles.lASearchButtonContainer} onPress={() => setShowSearchBar(!showSearchBar)}>
+                        <Ionicons name="search" style={styles.lASearchButton}/>
+                    </TouchableOpacity>  
+                    <TouchableOpacity style={styles.lASearchFilterContainer} onPress={() => setModalVisible(true)}>
+                        <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.lAFilterIcon}/>
+                    </TouchableOpacity>        
+                </View>
+                {showSearchBar && (
+                    <View style={styles.aCSearchBarOverlay1}>
+                        <TextInput 
+                        style={styles.aCSearchInput} 
+                        placeholder="Search..."
+                        placeholderTextColor="#aaa"
+                        />
+                    </View>
+                )}
+                {cardsData.map((card, index) => (
+                <View key={index} style={styles.lACardsContainer}>
+                    <View style={styles.IACardHeader}>
+                    <Image
+                        style={styles.IAIcon}
+                        source={card.icon}
+                    />
+                    <Text style={styles.IACardText}>{card.title}</Text>
+                    </View>
+                    <TouchableOpacity style={styles.IAVideoCard} onPress={() => handlePress(card.title)}>
+                    <View style={styles.IAPlaceholder}>
+                        <Text style={styles.IAPlaceholderText}>Video Placeholder</Text>
+                    </View>
+                    </TouchableOpacity>
+                    <View style={styles.IACardDetailsConTainer}>
+                    <View style={styles.IACardDetails}>
+                        <Text style={styles.IACardDetailsText}>已觀看影片</Text>
+                        <Text style={styles.IACardDetailsStats}>{card.watchedVideos}</Text>
+                    </View>
+                    <View style={styles.IACardDetails}>
+                        <Text style={styles.IACardDetailsText}>已完成練習</Text>
+                        <Text style={styles.IACardDetailsStats}>{card.completedExercises}</Text>
+                    </View>
+                    <View style={styles.IACardDetails}>
+                        <Text style={styles.IACardDetailsText}>年級</Text>
+                        <Text style={styles.IACardDetailsStats}>{card.grade}</Text>
+                    </View>
+                    </View>
+                </View>
+                ))}
+                
+            </ScrollView>
+            <BottomNavBar/>
+        </SafeAreaView>
+    );
+  }
+
+
+  const styles = StyleSheet.create({
+    lAContainer: {
+      flex: 1,
+      backgroundColor:'white',
+      marginTop: -30,
+      
+    },
+    lAScrollViewContent: {
+        paddingBottom: 140,
+        
+    },
+    lAHeader:{ 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 18,
+        width: '100%',
+    },
+    lABackButton: {
+        fontSize: 24,
+        color: '#48bcbc',
+      },
+    lAHeaderText: {
+        textAlign: 'center',
+        color: '#48bcbc',
+        fontSize: 16,
+        fontWeight: 'bold',
+        flex: 1,
+    },
+    lASearchButtonContainer: {
+        zIndex: 2,
+        position: 'absolute',
+        right: 55, 
+    },
+    lASearchButton: {
+        fontSize: 24,
+        color: '#48bcbc',
+    },
+    lASearchFilterContainer: {
+        zIndex:-1,
+    },
+    lAFilterIcon:{
+        marginLeft: 20,
+        color:"#00A3A3",
+    },
+    aCSearchBarOverlay1: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        paddingLeft: 120, // Adjust this value to leave space for the back button
+        paddingTop: 13, // Adjust this value if needed to align the search bar with the header
+        backgroundColor:'white',
+        paddingRight: 50,
+        zIndex: -1,
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    aCSearchInput: {
+        flex: 1,
+        backgroundColor: '#ecf4f4',
+        height: 45,
+        borderWidth: 0, // Remove border width to avoid the line
+        borderBottomWidth: 0, // Ensure bottom border is removed
+        borderRadius: 20, // Apply high border radius for rounded corners
+        borderColor: 'transparent', // Set border color to transparent
+        paddingLeft: 20,
+        paddingRight: 30, // Add padding to the right to make space for the icon
+    },
+    lACardsContainer:{ 
+        alignSelf: 'center',
+        backgroundColor: '#fffcec',
+        width: '90%',
+        height: 380,
+        borderRadius: 15,
+        marginBottom: 30,
+    },
+    IACardHeader:{
+        flexDirection:'row',
+        marginLeft: 30,
+        marginTop: 30,
+        alignItems:'center',
+    },
+    IAIcon:{
+        height:40,
+        width:40,
+    },
+    IACardText:{
+        fontSize: 20,
+        marginLeft:20,
+        fontWeight: 'bold',
+        color: '#48bcbc',
+    },
+    IAVideoCard: {
+        justifyContent: 'center',
+        alignSelf: 'center',
+        backgroundColor: '#e0e0e0',
+        width: '80%',
+        height: '45%',
+        margin: 20,
+        borderRadius: 10,
+    },
+    IAPlaceholder: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    IAPlaceholderText: { 
+        color: '#000',
+        fontSize: 16,
+    },
+    IACardDetailsConTainer:{
+        marginTop: 20,
+        flexDirection:'row',
+        marginHorizontal: 30,
+        alignSelf:'center',
+        gap:40,
+    },
+    IACardDetails:{
+        flexDirection:'column',
+        alignItems:'flex-start',
+        
+    },
+    IACardDetailsText:{
+        fontSize:13,
+        color: '#48bcbc',
+    },
+    IACardDetailsStats:{
+        fontSize:25,
+        color: '#48bcbc',
+        fontWeight:'bold',
+    },
+
+  
+  });
+
+  export default LanguageAwareness
