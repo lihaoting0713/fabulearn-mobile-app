@@ -10,6 +10,7 @@ import Header from './components/Header'; // Ensure correct path
 import BottomNavBar from './components/BottomNavBar'; // Ensure correct path
 import StartChallenge from './StartChallenge';
 import AccountStack from './AccountStack';
+import StudyPackageStack from './StudyPackageStack';
 
 const Stack = createNativeStackNavigator();
 
@@ -23,6 +24,7 @@ const App = () => {
         <Stack.Screen name="VideoLibrary" component={VideoLibrary} />
         <Stack.Screen name="StartChallenge" component={StartChallenge} />
         <Stack.Screen name="AccountStack" component={AccountStack} />
+        <Stack.Screen name="StudyPackageStack" component={StudyPackageStack} />
       </Stack.Navigator>
       <BottomNavBar />
     </NavigationContainer>

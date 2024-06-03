@@ -55,7 +55,9 @@ const BottomNavBar = () => {
                 <Text style={styles.navTextLarge}>挑戰</Text>
                 </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.navButton}>
+            <TouchableOpacity style={styles.navButton}  onPress={() => {
+                    handleNavigation('StudyPackageStack')
+            }}>
                 <Image 
                     style ={styles.studyIcon}
                     source={require('../pictures/study Icon.png')}
@@ -174,6 +176,7 @@ const styles = StyleSheet.create({
 
       activeButton: {
         backgroundColor: 'white', // Set the active button background to white
+        
     },
     
     
