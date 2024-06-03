@@ -97,11 +97,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginHorizontal: 30,
+    marginHorizontal: 30,  
   },
   text: {
     fontSize: 20,
     marginLeft: 20,
+
   },
 });
 

@@ -240,14 +240,16 @@ const styles = StyleSheet.create({
     width: 97,
     height: 97,
     justifyContent: 'center',
-    alignItems: 'center',    
+    alignItems: 'center',  
+   
   },
 
   curveSvg: {
     position: 'absolute',
     width: '50%',
-    height: 125, // Adjust height as necessary
-    bottom: 60, // Adjust based on visual needs  
+    height: 125, 
+    bottom: 60, 
+    
   },
 
   navText: {

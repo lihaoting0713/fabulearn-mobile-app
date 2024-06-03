@@ -11,7 +11,7 @@ import {
   TextInput,
   Modal,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useNavigation } from '@react-navigation/native';
 import BottomNavBar from '../components/BottomNavBar'; // Import the BottomNavBar component

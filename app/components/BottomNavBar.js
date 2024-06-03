@@ -11,7 +11,6 @@ const BottomNavBar = () => {
     const currentRoute = routeNames[routeNames.length - 1]; // This assumes a stack or similar navigator
 
     const handleNavigation = (screenName) => {
-        console.log(`Navigating to ${screenName}`); // Add logging
         navigation.navigate(screenName);
     };
     
@@ -56,7 +55,7 @@ const BottomNavBar = () => {
                 </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.navButton}  onPress={() => {
-                    handleNavigation('StudyPackageStack')
+                    navigation.navigate('StudyPackageStack', { screen: 'StudyPackage' });
             }}>
                 <Image 
                     style ={styles.studyIcon}
@@ -75,9 +74,9 @@ const BottomNavBar = () => {
             </TouchableOpacity>
             </View>
 
-            <Svg style={styles.curveSvg} viewBox="0 0 375 100">
+            <Svg style={styles.curveSvg} viewBox="0 0 375 100" pointerEvents="none">
             <Path
-                fill="#48bcbc" // This color can be adjusted to match your app theme
+                fill="#48bcbc" 
                 d="M0,100 Q187.5,-20 375,100 T375,100" // Cubic Bezier curve for bell shape
             />
             </Svg>
@@ -89,7 +88,6 @@ const styles = StyleSheet.create({
     container5: {
         alignItems: 'center',
     },
-
     bottomNav: {
         flexDirection: 'row',
         justifyContent: 'space-around',
@@ -102,25 +100,20 @@ const styles = StyleSheet.create({
         zIndex: 1,  
         paddingHorizontal: 20, 
     },
-
     navButton:{
         justifyContent: 'center',
         alignItems: 'center',
         width:60,
         height:100,
     },
-
     homeIcon: {
         width: 30,
         height: 26,
-      },
-    
+      },    
     filmIcon: {
         width: 33,
         height: 26,
     },
-
-
     gloveIcon: {
         width:40,
         height: 55,
@@ -130,56 +123,44 @@ const styles = StyleSheet.create({
         width: 26,
         height: 26,
     },
-
     accountIcon: {
         
         width: 26,
         height: 26,
     },
-
       navText: {
         fontSize: 12,
         color: 'white',
         marginTop: 10,
-      },
-      
+      },    
       navTextLarge: {
         fontSize: 16,
         color: '#489ca4',
         fontWeight: 'bold',
       },
-
       navButtonLarge: {
         backgroundColor: '#ffbc04',
         borderRadius: 50,
         width: 97,
         height: 97,
         justifyContent: 'center',
-        alignItems: 'center',
-        
+        alignItems: 'center',        
       },
-
       challengeButtonContainer: {
-        alignSelf: 'center', // Centers the button horizontally
+        alignSelf: 'center', 
         justifyContent: 'center',
         alignItems: 'center',
         top: -15, // Adjusts the button to protrude upwards from the nav bar
-      },
-    
+      },  
       curveSvg: {
         position: 'absolute',
         width: '50%',
-        height: 122, // Adjust height as necessary
-        bottom: 60, // Adjust based on visual needs
-        
+        height: 122, 
+        bottom: 60, 
       },
-
       activeButton: {
-        backgroundColor: 'white', // Set the active button background to white
-        
-    },
-    
-    
+        backgroundColor: 'white',  
+    },   
 
 });
 

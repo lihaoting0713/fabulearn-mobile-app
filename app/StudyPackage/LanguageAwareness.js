@@ -11,7 +11,7 @@ import {
     Modal,
   } from "react-native";
   import React, { useState } from "react";
-  import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+  import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
   import BottomNavBar from '../components/BottomNavBar';
   import { useNavigation } from '@react-navigation/native';
   import VideoList from './VideoLists';
@@ -20,6 +20,7 @@ import {
   function LanguageAwareness() {
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
+    const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
     const navigation = useNavigation();
 
     const handlePress = (sectionTitle) => {
@@ -50,16 +51,16 @@ import {
              
             <ScrollView style={styles.lAScrollViewContent}>
                 <View style={styles.lAHeader}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Text style={styles.lABackButton}>←</Text>
-                    </TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.goBack()}>
+                    <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={20} marginLeft={10}/>  
+                </TouchableOpacity>
                     {!showSearchBar && (
                         <Text style={styles.lAHeaderText}>{`Capitalisation and\npunctuation`}</Text>
                     )}
                     <TouchableOpacity style={styles.lASearchButtonContainer} onPress={() => setShowSearchBar(!showSearchBar)}>
                         <Ionicons name="search" style={styles.lASearchButton}/>
                     </TouchableOpacity>  
-                    <TouchableOpacity style={styles.lASearchFilterContainer} onPress={() => setModalVisible(true)}>
+                    <TouchableOpacity style={styles.lASearchFilterContainer} onPress={() => setsearchfilterVisible(true)}>
                         <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.lAFilterIcon}/>
                     </TouchableOpacity>        
                 </View>
@@ -102,6 +103,78 @@ import {
                     </View>
                 </View>
                 ))}
+
+            <Modal
+                transparent={true}
+                visible={searchfilterVisible}
+                onRequestClose={() => setsearchfilterVisible(false)}
+            >
+                <View style={styles.modalBackground}>
+                <View style={styles.modalContainer}>
+                    <Text style={styles.modalTitle}>搜尋篩選器</Text>
+                    <View style={styles.modalContent}>
+                    <View style={styles.modalItem}>
+                        <Text>排序方式</Text>
+                        <View style={styles.modalselect}>
+                        <Text>相關性</Text>
+                        <Ionicons
+                            name="chevron-down-sharp"
+                            size={25}
+                            color={"grey"}
+                        />
+                        </View>
+                    </View>
+                    <View style={styles.modalItem}>
+                        <Text>科目</Text>
+                        <View style={styles.modalselect}>
+                        <Text>英文</Text>
+                        <Ionicons
+                            name="chevron-down-sharp"
+                            size={25}
+                            color={"grey"}
+                        />
+                        </View>
+                    </View>
+                    <View style={styles.modalItem}>
+                        <Text>上載日期</Text>
+                        <View style={styles.modalselect}>
+                        <Text>不限時間</Text>
+                        <Ionicons
+                            name="chevron-down-sharp"
+                            size={25}
+                            color={"grey"}
+                        />
+                        </View>
+                    </View>
+                    <View style={styles.modalItem}>
+                        <Text>片長</Text>
+                        <View style={styles.modalselect}>
+                        <Text>不限</Text>
+                        <Ionicons
+                            name="chevron-down-sharp"
+                            size={25}
+                            color={"grey"}
+                        />
+                        </View>
+                    </View>
+                    </View>
+                    <View style={styles.modalButtons}>
+                    <TouchableOpacity
+                        style={styles.modalButtonNo}
+                        onPress={() => setsearchfilterVisible(false)}
+                    >
+                        <Text style={styles.modalButtonText}>取消</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={styles.modalButtonYes}
+                        onPress={() => setsearchfilterVisible(false)}
+                    >
+                        <Text style={styles.modalButtonText}>確定</Text>
+                    </TouchableOpacity>
+                    </View>
+                </View>
+                </View>
+            </Modal>
                 
             </ScrollView>
             <BottomNavBar/>
@@ -241,6 +314,63 @@ import {
         color: '#48bcbc',
         fontWeight:'bold',
     },
+    modalBackground: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+      },
+      modalContainer: {
+        width: 300,
+        backgroundColor: "white",
+        borderRadius: 10,
+        paddingHorizontal: 20,
+        paddingVertical: 25,
+      },
+      modalTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        marginBottom: 20,
+      },
+      modalContent: {
+        width: "100%",
+        marginBottom: 20,
+      },
+      modalItem: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginBottom: 10,
+      },
+      modalselect: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: 100,
+      },
+      modalButtons: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        width: "100%",
+      },
+      modalButtonNo: {
+        flex: 1,
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "#fd5c63",
+        marginHorizontal: 10,
+        borderRadius: 30,
+      },
+      modalButtonYes: {
+        flex: 1,
+        alignItems: "center",
+        padding: 10,
+        backgroundColor: "#00A3A3",
+        marginHorizontal: 10,
+        borderRadius: 30,
+      },
+      modalButtonText: {
+        color: "white",
+        fontSize: 16,
+      },
 
   
   });

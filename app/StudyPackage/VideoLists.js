@@ -11,9 +11,10 @@ import {
     FlatList,
     TextInput,
     Modal,
+    
   } from "react-native";
 import { useNavigation } from '@react-navigation/native';
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
 
 const VideoList = ({ route }) => {
@@ -62,7 +63,7 @@ const VideoList = ({ route }) => {
     <View>
       <View style={styles.lAHeader}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Text style={styles.lABackButton}>←</Text>
+            <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={20} marginLeft={10}/>  
         </TouchableOpacity>
         {!showSearchBar && (
           <Text style={styles.lAHeaderText}>{sectionTitle} </Text>
@@ -370,7 +371,63 @@ const styles = StyleSheet.create({
     },
     paddingBottom: {
         paddingBottom: 140,
-        
+    },
+    modalBackground: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+    },
+    modalContainer: {
+      width: 300,
+      backgroundColor: "white",
+      borderRadius: 10,
+      paddingHorizontal: 20,
+      paddingVertical: 25,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 20,
+    },
+    modalContent: {
+      width: "100%",
+      marginBottom: 20,
+    },
+    modalItem: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      marginBottom: 10,
+    },
+    modalselect: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: 100,
+    },
+    modalButtons: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      width: "100%",
+    },
+    modalButtonNo: {
+      flex: 1,
+      alignItems: "center",
+      padding: 10,
+      backgroundColor: "#fd5c63",
+      marginHorizontal: 10,
+      borderRadius: 30,
+    },
+    modalButtonYes: {
+      flex: 1,
+      alignItems: "center",
+      padding: 10,
+      backgroundColor: "#00A3A3",
+      marginHorizontal: 10,
+      borderRadius: 30,
+    },
+    modalButtonText: {
+      color: "white",
+      fontSize: 16,
     },
 });
 

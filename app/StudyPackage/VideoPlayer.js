@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ScrollView } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import {Ionicons,Octicons,MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
+import {Ionicons, Octicons, MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
 
 const VideoPlayer = () => {
