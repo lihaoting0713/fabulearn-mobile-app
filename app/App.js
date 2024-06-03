@@ -15,9 +15,11 @@ import StudyPackageStack from './StudyPackageStack';
 const Stack = createNativeStackNavigator();
 
 const App = () => {
+  
   return (
     <NavigationContainer>
       <Header />
+      
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Challenge" component={ChallengeScreen} />
