@@ -13,7 +13,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React, { useState } from "react";
-import BottomNavBar from './components/BottomNavBar'; // Import the BottomNavBar component
+import BottomNavBar from '../components/BottomNavBar'; // Import the BottomNavBar component
 
 function VideoLibrary({ navigation }) {
   const [showSearchBar, setShowSearchBar] = useState(false);
@@ -53,8 +53,6 @@ function VideoLibrary({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
-
-
         <FlatList
           data={videolist}
           keyExtractor={(item) => item.id}

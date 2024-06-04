@@ -30,7 +30,7 @@ const BottomNavBar = () => {
                 <Text style={styles.navText}>主頁</Text>
             </TouchableOpacity>
             <TouchableOpacity  style={styles.navButton} onPress={() => {
-                    handleNavigation('VideoLibrary')
+                    handleNavigation('VideoStack')
             }}>
                 <Image 
                     style ={styles.filmIcon}
