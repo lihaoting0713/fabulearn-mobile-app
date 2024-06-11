@@ -18,7 +18,6 @@ import BottomNavBar from '../components/BottomNavBar'; // Import the BottomNavBa
 function VideoLibrary({ navigation }) {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); // State to control modal visibility
-
   const [subjectlist, setSubjectlist] = useState([
     { text: "中文", id: "subject1" },
     { text: "英文", id: "subject2" },

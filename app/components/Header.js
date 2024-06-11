@@ -1,16 +1,21 @@
 // Header.js
 import React from 'react';
-
+import { useNavigation} from '@react-navigation/native';
 import { View, Image, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import Notification from '../Notifications';
 
-const Header = () => (
+const Header = () => {
+
+  const navigation = useNavigation();
+
+  return(
     <View style={styles.header}>
         <Image
             style={styles.logo}
             source={require('../pictures/JCBLP_logo.cbf23730.png')}
         />
         
-        <TouchableOpacity style={styles.bellIconContainer}>
+        <TouchableOpacity style={styles.bellIconContainer} onPress={()=>{navigation.navigate('Notifications')}}>
             <Image
                 style={styles.bellIcon}
                 source={require('../pictures/Bell Icon.png')}
@@ -20,8 +25,8 @@ const Header = () => (
             </View>
         </TouchableOpacity>
     </View>
-);
 
+);};
 
 
 

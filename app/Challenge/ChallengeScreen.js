@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Alert, Modal, StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
+import { Alert, Modal, Dimensions,  StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import BottomNavBar from './components/BottomNavBar';
+import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import BottomNavBar from '../components/BottomNavBar';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import StartChallenge from './StartChallenge';
 
-
+const { width } = Dimensions.get('window');
+const isSmallScreen = width < 370;
+console.log(width)
 
 const ChallengeScreen = () => {
     const navigation = useNavigation();
@@ -103,8 +107,6 @@ const ChallengeScreen = () => {
       ];
       
 
-
-
       const renderContent = () => {
         switch (activePage) {
             case '發起挑戰':
@@ -114,13 +116,13 @@ const ChallengeScreen = () => {
                         
                         <View style={styles.sCHeader}>
                             <TouchableOpacity onPress={handleBackButtonPress}>
-                                <Text style={styles.sCBackButton}>←</Text>
+                                <Octicons name="chevron-left" size={30} color="#00A3A3" marginRight={10} />
                             </TouchableOpacity>
                             {!showSearchBar && (
                                 <Text style={styles.sCHeaderText}>發起挑戰</Text>
                             )}
                             <TouchableOpacity style={styles.sCSearchButtonContainer} onPress={() => setShowSearchBar(!showSearchBar)}>
-                                <Text style={styles.sCSearchButton}>🔍</Text>
+                                <Ionicons name="search" size={35} style={styles.sCSearchButton} />
                             </TouchableOpacity>
                             
                         </View>
@@ -180,7 +182,7 @@ const ChallengeScreen = () => {
                                 />
                             </View>
                         
-                            <TouchableOpacity style={styles.sCConfirmButton}>
+                            <TouchableOpacity style={styles.sCConfirmButton} onPress={() =>navigation.navigate('StartChallenge')}>
                                 <Text style={styles.sCConfirmButtonText}>確認</Text>
                             </TouchableOpacity>
 
@@ -218,20 +220,19 @@ const ChallengeScreen = () => {
                         <ScrollView  contentContainerStyle={styles.aCScrollViewContent1} >
                         <View style={styles.aCHeader}>
                             <TouchableOpacity onPress={() => setActivePage('')}>
-                                <Text style={styles.aCBackButton}>←</Text>
+                                <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={10}/>
                             </TouchableOpacity>
                             {!showSearchBar && (
                                 <Text style={styles.aCHeaderText}>接受挑戰</Text>
                             )}
                             <TouchableOpacity style={styles.aCSearchButtonContainer1} onPress={() => setShowSearchBar(!showSearchBar)}>
-                                <Text style={styles.aCSearchButton}>🔍</Text>
+                                <Ionicons name="search" size={35} style={styles.aCSearchButton} />
                             </TouchableOpacity>
+
+                            
                             
                             <TouchableOpacity style={styles.aCSearchFilterContainer} onPress={() => setModalVisible(true)}>
-                                <Image
-                                    style={styles.aCFilterIcon}
-                                    source={require('./pictures/Filter Icon.png')}
-                                />
+                                <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.aCFilterIcon}/>
                             </TouchableOpacity>
                     
                         </View>
@@ -250,19 +251,19 @@ const ChallengeScreen = () => {
                                     <View style={styles.aCCardHeader}>
                                         <View style={styles.aCCardTitle1}>
                                             <Text style={styles.aCTitle}>{`#${item.id}`}</Text>
-                                            <Image source={require('./pictures/Account Icon Black.png')} style={styles.aCProfileImage}/>
+                                            <Image source={require('../pictures/Account Icon Black.png')} style={styles.aCProfileImage}/>
                                         </View>      
                                         <View style={styles.aCCardTitle2}>      
-                                        <Text style={styles.aCSubtitle}>{item.challenge}</Text>
-                                        <Text style={styles.aCDetails}>{item.details}</Text>
+                                        <Text style={[styles.aCSubtitle, isSmallScreen && styles.aCSubtitleSmall]}>{item.challenge}</Text>
+                                        <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>{item.details}</Text>
                                         </View>
                                     </View>
                                     <View style={styles.aCChancesContainer}>
-                                        <Text style={styles.aCChancesText}>機會</Text>
+                                        <Text style={[styles.aCChancesText, isSmallScreen && styles.aCChancesTextSmall]}>機會</Text>
                                         <View style={styles.aCHeartsContainer}>
-                                            <Image source={require('./pictures/Heart Full.png')} style={styles.aCHeartIcon} />
-                                            <Image source={require('./pictures/Heart Full.png')} style={styles.aCHeartIcon} />
-                                            <Image source={require('./pictures/Heart Empty.png')} style={styles.aCHeartIcon} />
+                                            <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
+                                            <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
+                                            <Image source={require('../pictures/Heart Empty.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
                                         </View>
                                     </View>
                                     <View style={styles.aCCardActions}>
@@ -314,20 +315,17 @@ const ChallengeScreen = () => {
                     <ScrollView  contentContainerStyle={styles.cCScrollViewContent} >
                     <View style={styles.cCHeader}>
                         <TouchableOpacity onPress={() => setActivePage('')}>
-                            <Text style={styles.cCBackButton}>←</Text>
+                            <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={10}/>
                         </TouchableOpacity>
                         {!showSearchBar && (
                             <Text style={styles.cCHeaderText}>進行中挑戰</Text>
                         )}
                         <TouchableOpacity style={styles.cCSearchButtonContainer1} onPress={() => setShowSearchBar(!showSearchBar)}>
-                            <Text style={styles.cCSearchButton}>🔍</Text>
+                            <Ionicons name="search" size={35} style={styles.cCSearchButton} />
                         </TouchableOpacity>
                         
                         <TouchableOpacity style={styles.cCSearchFilterContainer} onPress={() => setModalVisible(true)}>
-                            <Image
-                                style={styles.cCFilterIcon}
-                                source={require('./pictures/Filter Icon.png')}
-                            />
+                            <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.cCFilterIcon}/>   
                         </TouchableOpacity>
                 
                     </View>
@@ -345,25 +343,25 @@ const ChallengeScreen = () => {
                             <View key={item.id} style={styles.cCCard}>
                                 <View style={styles.cCCardHeader}>
                                     <View style={styles.cCCardTitle1}>
-                                        <Text style={styles.cCTitle}>{`#${item.id}`}</Text>
-                                        <Image source={require('./pictures/Account Icon Black.png')} style={styles.cCProfileImage}/>
+                                        <Text style={[styles.aCTitle, isSmallScreen && styles.aCTitleSmall]}>{`#${item.id}`}</Text>
+                                        <Image source={require('../pictures/Account Icon Black.png')} style={[styles.cCProfileImage, isSmallScreen && styles.cCProfileImageSmall]}/>
                                     </View>      
                                     <View style={styles.cCCardTitle2}>      
-                                        <Text style={styles.cCSubtitle}>{item.challenge}</Text>
-                                        <Text style={styles.cCDetails}>{item.details}</Text>    
+                                        <Text style={[styles.cCSubtitle, isSmallScreen && styles.cCSubtitleSmall]}>{item.challenge}</Text>
+                                        <Text style={[styles.cCDetails, isSmallScreen && styles.cCDetailsSmall]}>{item.details}</Text>    
                                         <View style={styles.cCProgressContainer}>
                                             <View style={styles.cCProgressBar}>
                                                 <View style={[styles.cCProgress, { width: `${item.progress}%` }]} />
                                             </View>
-                                            <Text style={styles.cCProgressText}>{`${item.progress}%`}</Text>
+                                            <Text style={[styles.cCProgressText, isSmallScreen && styles.cCProgressTextSmall]}>{`${item.progress}%`}</Text>
                                         </View>
                                     </View>
                                     <View style={styles.cCChancesContainer}>
-                                        <Text style={styles.cCChancesText}>機會</Text>
+                                        <Text style={[styles.cCChancesText, isSmallScreen && styles.cCChancesTextSmall]}>機會</Text>
                                         <View style={styles.cCHeartsContainer}>
-                                            <Image source={require('./pictures/Heart Full.png')} style={styles.cCHeartIcon} />
-                                            <Image source={require('./pictures/Heart Full.png')} style={styles.cCHeartIcon} />
-                                            <Image source={require('./pictures/Heart Empty.png')} style={styles.cCHeartIcon} />
+                                            <Image source={require('../pictures/Heart Full.png')} style={[styles.cCHeartIcon, isSmallScreen && styles.cCHeartIconSmall]} />
+                                            <Image source={require('../pictures/Heart Full.png')} style={[styles.cCHeartIcon, isSmallScreen && styles.cCHeartIconSmall]} />
+                                            <Image source={require('../pictures/Heart Empty.png')} style={[styles.cCHeartIcon, isSmallScreen && styles.cCHeartIconSmall]} />
                                         </View>
                                     </View>
                                 </View>
@@ -410,20 +408,17 @@ const ChallengeScreen = () => {
                     <ScrollView  contentContainerStyle={styles.cCScrollViewContent} >
                     <View style={styles.cCHeader}>
                         <TouchableOpacity onPress={() => setActivePage('')}>
-                            <Text style={styles.cCBackButton}>←</Text>
+                            <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={10}/>
                         </TouchableOpacity>
                         {!showSearchBar && (
                             <Text style={styles.cCHeaderText}>已完成挑戰</Text>
                         )}
                         <TouchableOpacity style={styles.cCSearchButtonContainer1} onPress={() => setShowSearchBar(!showSearchBar)}>
-                            <Text style={styles.cCSearchButton}>🔍</Text>
+                            <Ionicons name="search" size={35} style={styles.cCSearchButton} />
                         </TouchableOpacity>
                         
                         <TouchableOpacity style={styles.cCSearchFilterContainer} onPress={() => setModalVisible(true)}>
-                            <Image
-                                style={styles.cCFilterIcon}
-                                source={require('./pictures/Filter Icon.png')}
-                            />
+                            <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.cCFilterIcon}/> 
                         </TouchableOpacity>
                 
                     </View>
@@ -441,7 +436,7 @@ const ChallengeScreen = () => {
                         <View key={item.id} style={styles.fCCard}>
                             <View style={styles.fCCardHeader}>
                                 <View style={styles.fCCardUser}>
-                                    <Image source={require('./pictures/Account Icon Black.png')} style={styles.fCProfileImage}/>
+                                    <Image source={require('../pictures/Account Icon Black.png')} style={styles.fCProfileImage}/>
                                     <Text style={styles.fCTitle}>{item.name}</Text>
                                 </View>
                                 <View style={styles.fCCardTitle}>
@@ -450,9 +445,9 @@ const ChallengeScreen = () => {
                                         <View style={styles.fCChancesContainer}>
                                             <Text style={styles.fCChancesText}>機會</Text>
                                             <View style={styles.fCHeartsContainer}>
-                                                <Image source={require('./pictures/Heart Full.png')} style={styles.fCHeartIcon} />
-                                                <Image source={require('./pictures/Heart Full.png')} style={styles.fCHeartIcon} />
-                                                <Image source={require('./pictures/Heart Empty.png')} style={styles.fCHeartIcon} />
+                                                <Image source={require('../pictures/Heart Full.png')} style={styles.fCHeartIcon} />
+                                                <Image source={require('../pictures/Heart Full.png')} style={styles.fCHeartIcon} />
+                                                <Image source={require('../pictures/Heart Empty.png')} style={styles.fCHeartIcon} />
                                             </View>
                                         </View>
                                     </View>
@@ -508,20 +503,17 @@ const ChallengeScreen = () => {
                     <ScrollView  contentContainerStyle={styles.cCScrollViewContent} >
                     <View style={styles.cCHeader}>
                         <TouchableOpacity onPress={() => setActivePage('')}>
-                            <Text style={styles.cCBackButton}>←</Text>
+                            <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={10}/>
                         </TouchableOpacity>
                         {!showSearchBar && (
                             <Text style={styles.cCHeaderText}>已發起挑戰</Text>
                         )}
                         <TouchableOpacity style={styles.cCSearchButtonContainer1} onPress={() => setShowSearchBar(!showSearchBar)}>
-                            <Text style={styles.cCSearchButton}>🔍</Text>
+                            <Ionicons name="search" size={35} style={styles.cCSearchButton} />
                         </TouchableOpacity>
                         
                         <TouchableOpacity style={styles.cCSearchFilterContainer} onPress={() => setModalVisible(true)}>
-                            <Image
-                                style={styles.cCFilterIcon}
-                                source={require('./pictures/Filter Icon.png')}
-                            />
+                            <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.cCFilterIcon}/> 
                         </TouchableOpacity>
                 
                     </View>
@@ -540,7 +532,7 @@ const ChallengeScreen = () => {
                             <View style={styles.zCCardHeader}>
                                 <View style={styles.zCCardUserIcons}>
                                     {Array(6).fill().map((_, index) => (
-                                        <Image key={index} source={require('./pictures/Account Icon Black.png')} style={styles.zCProfileImage} />
+                                        <Image key={index} source={require('../pictures/Account Icon Black.png')} style={styles.zCProfileImage} />
                                     ))}
                                 </View>
                                 <Text style={styles.zCID}>{`#${item.id}`}</Text>
@@ -550,9 +542,9 @@ const ChallengeScreen = () => {
                                 <View style={styles.zCChancesContainer}>
                                     <Text style={styles.zCChancesText}>機會</Text>
                                     <View style={styles.zCHeartsContainer}>
-                                        <Image source={require('./pictures/Heart Full.png')} style={styles.zCHeartIcon} />
-                                        <Image source={require('./pictures/Heart Full.png')} style={styles.zCHeartIcon} />
-                                        <Image source={require('./pictures/Heart Empty.png')} style={styles.zCHeartIcon} />
+                                        <Image source={require('../pictures/Heart Full.png')} style={styles.zCHeartIcon} />
+                                        <Image source={require('../pictures/Heart Full.png')} style={styles.zCHeartIcon} />
+                                        <Image source={require('../pictures/Heart Empty.png')} style={styles.zCHeartIcon} />
                                     </View>
                                 </View>
                             </View>
@@ -695,12 +687,11 @@ const styles = StyleSheet.create({
     
     aCSearchFilterContainer: {
         zIndex:-1,
+        marginRight: -5
     },
    
     aCFilterIcon:{
-        width: 20,
-        height: 20,
-        marginLeft: 20,
+        color:"#00A3A3",
     },
     
 
@@ -910,21 +901,21 @@ const styles = StyleSheet.create({
     aCCard: {
         backgroundColor: '#fffcec',
         borderRadius: 10,
-        margin: 15,
-        padding: 15,
+        margin: 10,
+        padding: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.2,
         shadowRadius: 5,
         elevation: 3,
-        width: '95%',
-        alignSelf:'center'
+        width: width * 0.91,
+        alignSelf:'center',
     },
     
     aCCardHeader: {
         flexDirection: 'row',
         alignItems: 'flex-start',
-        marginLeft: 10,
+        marginLeft: 10,     
     },
     
 
@@ -932,6 +923,7 @@ const styles = StyleSheet.create({
         marginRight: 20,
         flexDirection: 'column',  // Keep column to stack vertically
         alignItems: 'center',  // Center horizontally
+        width: '18%',       
     },
     
     aCProfileImage: {
@@ -939,29 +931,39 @@ const styles = StyleSheet.create({
         height: 45,
         borderRadius: 25,
         marginTop:10,
-
-    },
+   },
     
     aCCardTitle2: {
         marginRight: 20,
         flexDirection: 'column',  // Keep column to stack vertically
-        alignItems: 'flex-start',  // Center horizontally
+        alignItems: 'flex-start',  // Center horizontall             
     },
     
     aCTitle: {
         fontSize: 16,
-        fontWeight: 'bold',
-        
+        fontWeight: 'bold',    
     },
-   
+    aCTitleSmall: {
+        fontSize: 14,
+        fontWeight: 'bold',
+      },
     aCSubtitle: {
         fontSize: 14,
         color: '#555',
         padding: 5,
-    },
-    
+    },   
+    aCSubtitleSmall: {
+        fontSize: 13,
+        color: '#555',
+        padding: 5,
+    },   
     aCDetails: {
         fontSize: 12,
+        color: '#777',
+        padding: 5,
+    },
+    aCDetailsSmall: {
+        fontSize: 11,
         color: '#777',
         padding: 5,
     },
@@ -973,18 +975,29 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     aCChancesText: {
-        fontSize: 14,
+        fontSize: 13,
+        color: '#555',
+        marginRight: 5,
+    },
+    aCChancesTextSmall: {
+        fontSize: 12,
         color: '#555',
         marginRight: 5,
     },
     aCHeartsContainer: {
         flexDirection: 'row',
+        width: '19%',
     },
     aCHeartIcon: {
         width: 18,
-        height: 15,
+        height: 16,
         marginLeft:2,
     },   
+    aCHeartIconSmall: {
+        width: 15,
+        height: 13,
+        marginLeft:2,
+    },  
     aCCardActions: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -992,7 +1005,6 @@ const styles = StyleSheet.create({
         marginTop: -5,
         marginBottom: 10,
     },
-    
     aCRejectButton: {
         backgroundColor: '#FF6F61',
         borderRadius: 30,
@@ -1001,7 +1013,6 @@ const styles = StyleSheet.create({
         marginRight:5,
         
     },
-    
     aCDetailsButton: {
         backgroundColor: '#4DB6AC',
         borderRadius: 30,
@@ -1127,7 +1138,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 5,
         elevation: 3,
-        width: '95%',
+        width: width * 0.9,
         alignSelf: 'center',
       },
       cCHeader: {
@@ -1157,6 +1168,12 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         marginTop: 10,
       },
+      cCProfileImageSmall: {
+        width: 35,
+        height: 35,
+        borderRadius: 25,
+        marginTop: 10,
+      },
       cCCardTitle2: {
         marginRight: 20,
         flexDirection: 'column',
@@ -1168,8 +1185,18 @@ const styles = StyleSheet.create({
         color: '#555',
         padding: 5,
       },
+      cCSubtitleSmall: {
+        fontSize: 13,
+        color: '#555',
+        padding: 5,
+      },
       cCDetails: {
         fontSize: 12,
+        color: '#777',
+        padding: 5,
+      },
+      cCDetailsSmall: {
+        fontSize: 11,
         color: '#777',
         padding: 5,
       },
@@ -1207,6 +1234,13 @@ const styles = StyleSheet.create({
         marginRight:-23,
         marginTop: -12,
       },
+    cCProgressTextSmall: {
+        fontSize: 25,
+        color: '#69cccc',
+        fontWeight: 'bold',
+        marginRight:-23,
+        marginTop: -12,
+      },
     cCChancesContainer: {
         position: 'absolute',
         top: 4,
@@ -1219,15 +1253,25 @@ const styles = StyleSheet.create({
         color: '#555',
         marginRight: 5,
     },
+    cCChancesTextSmall: {
+        fontSize: 12,
+        color: '#555',
+        marginRight: 5,
+    },
+
     cCHeartsContainer: {
         flexDirection: 'row',
     },
     cCHeartIcon: {
         width: 18,
-        height: 15,
+        height: 16,
         marginLeft:2,
     },
-
+    cCHeartIconSmall: {
+        width: 15,
+        height: 13,
+        marginLeft:2,
+    },
     cCPageContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -1248,11 +1292,10 @@ const styles = StyleSheet.create({
       },
     cCSearchFilterContainer: {
         zIndex:-1,
+        marginRight: -5,
     },
-    cCFilterIcon:{
-        width: 20,
-        height: 20,
-        marginLeft: 20,
+    cCFilterIcon:{ 
+        color:"#00A3A3",
     },
     cCSearchBarOverlay1: {
         position: 'absolute',

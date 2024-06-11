@@ -30,79 +30,42 @@ function StudyPackage() {
     { text: "共通能力", id: "subject5" },
   ]);
 
-  const [videolist, setVideolist] = useState([
-    {
-      title: "title1",
-      id: "video1",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-    },
-    {
-      title: "title2",
-      id: "video2",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-    },
-    {
-      title: "title3",
-      id: "video3",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-    },
-  ]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
+    <ScrollView style={styles.scrollViewContent}>
+      <View style={styles.top}>
+        {showSearchBar ? (
+          <View style={styles.searchBarContainer}>
+            <TouchableOpacity onPress={() => setShowSearchBar(false)}>
+              <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={10}/>
+            </TouchableOpacity>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search"
+              placeholderTextColor="#999999"
+            />
+          </View>
+        ) : (
+          <>
+            <Ionicons name="search" size={30} style={{ opacity: 0 }} />
 
-
-        <FlatList
-          data={videolist}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={() => 
-            <>
-        <View style={styles.top}>
-          {showSearchBar ? (
-            <View style={styles.searchBarContainer}>
-              <TouchableOpacity onPress={() => setShowSearchBar(false)}>
-                <Ionicons name="arrow-back" size={30} color="#00A3A3" />
-              </TouchableOpacity>
-              <TextInput
-                style={styles.searchBar}
-                placeholder="Search"
-                placeholderTextColor="#999999"
-              />
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>學習包</Text>
             </View>
-          ) : (
-            <>
-              <MaterialCommunityIcons
-                name="dots-vertical"
-                size={30}
-                style={{ marginRight: 5, opacity: 0 }}
-              />
-
-              <Ionicons name="search" size={30} style={{ opacity: 0 }} />
-
-              <View style={styles.titleContainer}>
-                <Text style={styles.title}>影片庫</Text>
-              </View>
-              <View style={styles.iconsContainer}>
-                <TouchableOpacity
-                  onPress={() => setShowSearchBar(true)}
-                  style={styles.searchIcon}
-                >
-                  <Ionicons name="search" size={30} color="#00A3A3" />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={() => setsearchfilterVisible(true)}>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-        </View>
-
-        
+            <View style={styles.iconsContainer}>
+              <TouchableOpacity
+                onPress={() => setShowSearchBar(true)}
+                style={styles.searchIcon}
+              >
+                <Ionicons name="search" size={30} color="#00A3A3" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setsearchfilterVisible(true)}>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+      </View>
 
         <View style={styles.subjectContainer}>
           <ScrollView
@@ -130,9 +93,8 @@ function StudyPackage() {
               </View>
             </View>
           </ScrollView>
-
-          
         </View>
+
         <View style={styles.progressContainer}>
             <View style={styles.statItem}>
                 <Text style={styles.statLabel}>已觀看影片</Text>
@@ -144,83 +106,80 @@ function StudyPackage() {
             </View>
             <Text style={styles.detailLink}>詳情</Text>
         </View>
+        
+        <View>
+          <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('LanguageAwareness')}>
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Language\nAwareness`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('LanguageAwareness')}>
-            <View style={styles.workItem}>
-                <Image 
-                    style ={styles.workIcon}
-                    source={require('../pictures/Account Icon.png')}
-                    />
-                <Text style={styles.workLabel}>
-                    {`Language\nAwareness`}
-                </Text>
-            </View>  
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.workContainer}>
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Language\nAwareness`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.workContainer}>
-            <View style={styles.workItem}>
-                <Image 
-                    style ={styles.workIcon}
-                    source={require('../pictures/Account Icon.png')}
-                    />
-                <Text style={styles.workLabel}>
-                    {`Language\nAwareness`}
-                </Text>
-            </View>  
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.workContainer}>
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Grammar`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.workContainer}>
-            <View style={styles.workItem}>
-                <Image 
-                    style ={styles.workIcon}
-                    source={require('../pictures/Account Icon.png')}
-                    />
-                <Text style={styles.workLabel}>
-                    {`Grammar`}
-                </Text>
-            </View>  
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.workContainer}>
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Reading and\nWriting`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.workContainer}>
-            <View style={styles.workItem}>
-                <Image 
-                    style ={styles.workIcon}
-                    source={require('../pictures/Account Icon.png')}
-                    />
-                <Text style={styles.workLabel}>
-                    {`Reading and\nWriting`}
-                </Text>
-            </View>  
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.workContainer}>
-            <View style={styles.workItem}>
-                <Image 
-                    style ={styles.workIcon}
-                    source={require('../pictures/Account Icon.png')}
-                    />
-                <Text style={styles.workLabel}>
-                    {`Phrases, clauses\nand sentences`}
-                </Text>
-            </View>  
-        </TouchableOpacity>
-
-            </>
-          }  
-        />
+          <TouchableOpacity style={styles.workContainerLast}>
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Phrases, clauses\nand sentences`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
       <BottomNavBar/>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    
   },
-  scrollView: {
-    width: "100%",
-    flex: 1,
+
+  scrollViewContent: {
   },
   top: {
     flexDirection: "row",
@@ -466,6 +425,18 @@ workLabel: {
     fontWeight:'bold',
     padding: 10,
     marginLeft: 10,
+},
+workContainerLast:{
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: '#fffcec',
+  padding: 20,
+  borderRadius: 10,
+  height: '11.5%',
+  margin: 15,
+  marginBottom:200,
+ 
 },
 
 });

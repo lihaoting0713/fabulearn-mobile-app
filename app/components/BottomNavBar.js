@@ -42,10 +42,10 @@ const BottomNavBar = () => {
                 <TouchableOpacity 
                     style={[
                         styles.navButtonLarge, 
-                        currentRoute === 'ChallengeScreen' ? styles.activeButton : null
+                        (currentRoute === 'ChallengeScreen' || currentRoute === 'StartChallenge3') ? styles.activeButton : null
                     ]}
                     onPress={() => 
-                        handleNavigation('ChallengeScreen')
+                        handleNavigation('ChallengeStack')
                 }>
                 <Image 
                     style ={styles.gloveIcon}

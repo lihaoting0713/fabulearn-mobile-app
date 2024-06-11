@@ -1,5 +1,5 @@
 // VideoList.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet,
     Text,
@@ -11,6 +11,8 @@ import {
     FlatList,
     TextInput,
     Modal,
+    Keyboard,
+    Platform
     
   } from "react-native";
 import { useNavigation } from '@react-navigation/native';
@@ -23,6 +25,7 @@ const VideoList = ({ route }) => {
 
   // Set up the state for the video list
   const [showSearchBar, setShowSearchBar] = useState(false);
+  
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
   const [modalVisible, setModalVisible] = useState(false);
   const [videolist, setVideolist] = useState([
@@ -54,9 +57,14 @@ const VideoList = ({ route }) => {
       notes: 2,
     },
   ]);
+
+
+  
+
+
   const handleVideoPress = (video) => {
     // Navigate to the VideoPlayer screen
-    navigation.navigate('VideoPlayer', { video});
+    navigation.navigate('VideoPlayer', {video});
   };
 
   const renderHeader = () => (
@@ -88,9 +96,9 @@ const VideoList = ({ route }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
         
-        <ScrollView contentContainerStyle={styles.paddingBottom}>
+      <ScrollView contentContainerStyle={styles.paddingBottom} >
       <FlatList
         data={videolist}
         keyExtractor={(item) => item.id}
@@ -217,8 +225,8 @@ const VideoList = ({ route }) => {
       </Modal>
       </ScrollView> 
       
-      <BottomNavBar/>
-    </SafeAreaView>
+      <BottomNavBar />
+    </View>
   );
 };
 
@@ -429,6 +437,7 @@ const styles = StyleSheet.create({
       color: "white",
       fontSize: 16,
     },
+
 });
 
 export default VideoList;
