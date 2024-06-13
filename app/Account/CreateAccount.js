@@ -37,12 +37,12 @@ function CreateAccount() {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Ionicons name="chevron-back" size={40} color="#00A3A3" />
             </TouchableOpacity>
-            <Text style={styles.title}>Create account</Text>
+            <Text style={styles.title}>創建帳號</Text>
             <View style={{ width: 40 }} />
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>User Name</Text>
+            <Text style={styles.label}>用戶名稱</Text>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.input}
@@ -53,7 +53,7 @@ function CreateAccount() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>mail</Text>
+            <Text style={styles.label}>郵件</Text>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.input}
@@ -64,7 +64,7 @@ function CreateAccount() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>密碼</Text>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.input}
@@ -86,7 +86,7 @@ function CreateAccount() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>確認密碼</Text>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.input}
