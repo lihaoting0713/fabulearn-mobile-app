@@ -274,7 +274,7 @@ const StartChallenge = () => {
           <TouchableOpacity>
             <Text style = {styles.bottomButtonPreviousStep}>上一步</Text>
           </TouchableOpacity>
-          <TouchableOpacity style= {styles.nextStepButton} onPress={()=>navigation.navigate('ChallengeScreen')}>
+          <TouchableOpacity style= {styles.nextStepButton} onPress={()=>navigation.navigate('StartChallenge1')}>
             <Text style = {styles.bottomButtonNextStep}>下一步 (1/3)</Text>
           </TouchableOpacity>
         </View>
