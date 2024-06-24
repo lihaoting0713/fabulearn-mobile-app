@@ -18,16 +18,18 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
+import axios from 'axios'; 
 
 const VideoList = ({ route }) => {
-  const { sectionTitle } = route.params;
+  const { videoId } = route.params;
   const navigation = useNavigation();
 
   // Set up the state for the video list
   const [showSearchBar, setShowSearchBar] = useState(false);
-  
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
   const [modalVisible, setModalVisible] = useState(false);
+  const [videoListsItems,setVideoListsItems] = useState([]);
+  const [packageDetails,setPackageDetails] = useState([]);
   const [videolist, setVideolist] = useState([
     {
       title: "title1",
@@ -59,6 +61,40 @@ const VideoList = ({ route }) => {
   ]);
 
 
+  const FetchVideoListsItems = async (videoId) => {
+    try {
+      const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/related`;
+      console.log('Making request to:', url);
+      const response = await axios.get(url);
+      const data = response.data;
+
+      console.log(data);
+
+      
+
+      if (data.success) {
+        const packageDetails = data.data;
+        const items = Object.values(data.data.videos_in_package);
+        setVideoListsItems(items);
+        setPackageDetails(packageDetails);
+       
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    FetchVideoListsItems (videoId);
+  }, [videoId]);
+
+
+
   
 
 
@@ -74,7 +110,7 @@ const VideoList = ({ route }) => {
             <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={20} marginLeft={10}/>  
         </TouchableOpacity>
         {!showSearchBar && (
-          <Text style={styles.lAHeaderText}>{sectionTitle} </Text>
+          <Text style={styles.lAHeaderText}>{packageDetails.title}</Text>
         )}
         <TouchableOpacity style={styles.lASearchButtonContainer} onPress={() => setShowSearchBar(!showSearchBar)}>
           <Ionicons name="search" style={styles.lASearchButton}/>
@@ -100,7 +136,7 @@ const VideoList = ({ route }) => {
         
       <ScrollView contentContainerStyle={styles.paddingBottom} >
       <FlatList
-        data={videolist}
+        data={videoListsItems}
         keyExtractor={(item) => item.id}
         ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
@@ -116,22 +152,22 @@ const VideoList = ({ route }) => {
                   <Text style={styles.logoTitle}>{item.logotitle}</Text>
                 </View>
 
-                <View>
+                <View style={styles.videoDetails}>
                   {/* Video Title */}
                   <Text style={styles.videoTitle}>{item.title}</Text>
                   {/* Terms */}
                   <View style={styles.termsContainer}>
-                    {item.term.map((term, index) => (
-                      <TouchableOpacity key={index} style={styles.term}>
-                        <Text style={styles.termText}>{term}</Text>
-                      </TouchableOpacity>
+                    {item.hashtag.map((term, index) => (
+                        <TouchableOpacity key={index} style={styles.term}>
+                            <Text style={styles.termText}>{term}</Text>
+                        </TouchableOpacity>
                     ))}
                   </View>
                 </View>
               </View>
             </View>
             <TouchableOpacity onPress={() => handleVideoPress(item)}>
-              <View style={styles.thumbnail} />
+              <Image source={{ uri: item.thumbnail }} style={styles.thumbnailImage} />
             </TouchableOpacity>
             <View style={styles.buttonRow}>
                 <TouchableOpacity style={styles.button}>
@@ -265,11 +301,13 @@ const styles = StyleSheet.create({
   },
   videotext: {
     marginRight: 30,
-    marginBottom: 15,
+    marginBottom: 8,
+    alignSelf: 'flex-start',
   },
   logoandtitle: {
     flexDirection: 'row',
     alignItems: 'center',
+
     marginHorizontal: 10,
   },
   logoContainer: {
@@ -290,19 +328,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 5,
   },
+  videoDetails: {
+   
+  },
   videoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 10,
+    
   },
   termsContainer: {
     flexDirection: 'row',
+    marginTop: 10,
+    flexWrap: 'wrap',
+    maxWidth: '90%', 
+    marginVertical: 5,
+    
   },
   term: {
     paddingHorizontal: 10,
   },
   termText: {
     color: '#00A3A3',
+  },
+  thumbnailImage: {
+    width: 360,
+    height: 200,
+    backgroundColor: 'grey', // Placeholder for thumbnail
+    borderRadius: 25,
+    borderColor: '#D3D3D3',
+    borderWidth: 3,
+    alignSelf: 'center',
   },
   buttonRow: {
     flexDirection: 'row',

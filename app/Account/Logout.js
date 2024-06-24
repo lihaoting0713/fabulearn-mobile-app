@@ -5,13 +5,35 @@ import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
 function Logout() {
-    const [userName, setUserName] = useState('');
+    const [login_id, setlogin_id] = useState('');
     
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+    
+    const Login = async (login_id,password) => {
+        try {
+            console.log(login_id)
+            console.log(password)
+            let formdata = new FormData();
+            formdata.append("login_id", login_id);
+            formdata.append("password", password);
+            const url = "https://schools.fabulearn.net/api/login";
+            const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': "multipart/form-data;"
+            },
+            body: formdata
+            });
+            const data = await response.json();
+            console.log(data);
+        } catch (error) {
+            console.warn(error);
+        }
     };
     
     const navigation = useNavigation();
@@ -34,8 +56,8 @@ function Logout() {
                         <Text style={styles.label}>User Name</Text>
                         <TextInput
                             style={styles.input}
-                            value={userName}
-                            onChangeText={setUserName}
+                            value={login_id}
+                            onChangeText={setlogin_id}
                         />
                     </View>
                     <View style={styles.inputContainer}>
@@ -59,7 +81,7 @@ function Logout() {
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.confirmButton}>
+                    <TouchableOpacity style={styles.confirmButton} onPress={()=>(Login(login_id,password))}>
                         <Text style={styles.confirmButtonText}>確認</Text>
                     </TouchableOpacity>
 
@@ -156,8 +178,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     confirmButton: {
-        position: 'absolute',
-        bottom: 100,
+        top: 100,
         width: '100%',
         height: 50,
         backgroundColor: '#00A3A3',
@@ -171,7 +192,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     createaccontainer: {
-        position: 'absolute',
+        top: 110,
         bottom: 75,
         width: '100%',
     },

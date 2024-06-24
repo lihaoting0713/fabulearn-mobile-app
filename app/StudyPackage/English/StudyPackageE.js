@@ -12,24 +12,21 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigation } from '@react-navigation/native';
-import BottomNavBar from '../components/BottomNavBar'; // Import the BottomNavBar component
-import LanguageAwareness from "./LanguageAwareness";
+import BottomNavBar from '../../components/BottomNavBar'; // Import the BottomNavBar component
+import StudyPackageNavBar from '../StudyPackageNavBar';
+import { SvgUri } from "react-native-svg";
 
-function StudyPackage() {
+
+function StudyPackageE() {
   const navigation = useNavigation();
 
   const [showSearchBar, setShowSearchBar] = useState(false);
+ 
 
-  const [subjectlist, setSubjectlist] = useState([
-    { text: "中文", id: "subject1" },
-    { text: "英文", id: "subject2" },
-    { text: "數學", id: "subject3" },
-    { text: "科學", id: "subject4" },
-    { text: "共通能力", id: "subject5" },
-  ]);
-
+ 
+ 
 
   return (
     <View style={styles.container}>
@@ -67,38 +64,13 @@ function StudyPackage() {
         )}
       </View>
 
-        <View style={styles.subjectContainer}>
-          <ScrollView
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subjectContent}
-          >
-            <View style={styles.subject}>
-              <View style={styles.subjectItemContainer}>
-                <FlatList
-                  data={subjectlist}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.subjectItem}>
-                      <TouchableOpacity>
-                      <View style={styles.circle}>{/* Add icon here */}</View>
-                      </TouchableOpacity>
-                      <Text style={styles.subjectText}>{item.text}</Text>
-                    </View>
-                  )}
-                  horizontal
-                  scrollEnabled={false}
-                  showsHorizontalScrollIndicator={false}
-                />
-              </View>
-            </View>
-          </ScrollView>
-        </View>
+      <StudyPackageNavBar/>
+       
 
         <View style={styles.progressContainer}>
             <View style={styles.statItem}>
                 <Text style={styles.statLabel}>已觀看影片</Text>
-                <Text style={styles.statValue}>10/250</Text>
+                <Text style={styles.statValue}>9/250</Text>
             </View>
             <View style={styles.statItem}>
                 <Text style={styles.statLabel}>已完成練習</Text>
@@ -106,13 +78,28 @@ function StudyPackage() {
             </View>
             <Text style={styles.detailLink}>詳情</Text>
         </View>
+
+      
         
         <View>
+
+        <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('CapitalisationandPunctuation')} >
+              <View style={styles.workItem}>
+                  <Image 
+                      style ={styles.workIcon}
+                      source={require('../../pictures/Account Icon.png')}
+                      />
+                  <Text style={styles.workLabel}>
+                      {`Capitalisation\n and punctuation`}
+                  </Text>
+              </View>  
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('LanguageAwareness')}>
               <View style={styles.workItem}>
                   <Image 
                       style ={styles.workIcon}
-                      source={require('../pictures/Account Icon.png')}
+                      source={require('../../pictures/Account Icon.png')}
                       />
                   <Text style={styles.workLabel}>
                       {`Language\nAwareness`}
@@ -120,23 +107,11 @@ function StudyPackage() {
               </View>  
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.workContainer}>
+          <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('Grammar')}>
               <View style={styles.workItem}>
                   <Image 
                       style ={styles.workIcon}
-                      source={require('../pictures/Account Icon.png')}
-                      />
-                  <Text style={styles.workLabel}>
-                      {`Language\nAwareness`}
-                  </Text>
-              </View>  
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.workContainer}>
-              <View style={styles.workItem}>
-                  <Image 
-                      style ={styles.workIcon}
-                      source={require('../pictures/Account Icon.png')}
+                      source={require('../../pictures/Account Icon.png')}
                       />
                   <Text style={styles.workLabel}>
                       {`Grammar`}
@@ -144,11 +119,11 @@ function StudyPackage() {
               </View>  
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.workContainer}>
+          <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('ReadingandWriting')}>
               <View style={styles.workItem}>
                   <Image 
                       style ={styles.workIcon}
-                      source={require('../pictures/Account Icon.png')}
+                      source={require('../../pictures/Account Icon.png')}
                       />
                   <Text style={styles.workLabel}>
                       {`Reading and\nWriting`}
@@ -156,17 +131,18 @@ function StudyPackage() {
               </View>  
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.workContainerLast}>
+          <TouchableOpacity style={styles.workContainerLast} onPress={() => navigation.navigate('PhrasesClausesandSentences')}>
               <View style={styles.workItem}>
                   <Image 
                       style ={styles.workIcon}
-                      source={require('../pictures/Account Icon.png')}
+                      source={require('../../pictures/Account Icon.png')}
                       />
                   <Text style={styles.workLabel}>
                       {`Phrases, clauses\nand sentences`}
                   </Text>
               </View>  
           </TouchableOpacity>
+
         </View>
       </ScrollView>
       <BottomNavBar/>
@@ -252,6 +228,16 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "white",
     marginBottom: 8,
+  },
+  selectedCircle: {
+    borderColor: 'red', // or any color to highlight
+    borderWidth: 4,
+  },
+  subjectText: {
+    // Your styles here
+  },
+  selectedText: {
+    color: 'blue', // or any color to highlight
   },
   subjectText: {
     marginTop: 5,
@@ -441,4 +427,4 @@ workContainerLast:{
 
 });
 
-export default StudyPackage;
+export default StudyPackageE;

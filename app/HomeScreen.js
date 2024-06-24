@@ -1,23 +1,71 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, SafeAreaView, Dimensions, Button} from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, SafeAreaView, Dimensions, ActivityIndicator} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Header from './components/Header';
+import { Video } from 'expo-av';
 import BottomNavBar from './components/BottomNavBar'; 
+import axios from 'axios'; 
+import HomeVideo from './HomeVideo.js'
 
 
 
 
 const HomeScreen = () => {
-
-
-  const [activePage, setActivePage] = useState('系統挑戰'); 
-  const navigation = useNavigation();
   
 
+  const [activePage, setActivePage] = useState('系統挑戰'); 
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [watchHistoryVideos, setWatchHistoryVideos] = useState([]);
+  const [recommendedVideos1, setRecommendedVideos1] = useState([]);
+  const [recommendedVideos2, setRecommendedVideos2] = useState([]);
+  const [learnvideolist, setLearnvideolist] = useState([]);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const navigation = useNavigation();
+  const videoId = 485;
+  const videoRef = useRef(null);
+
+
+
+
+  const fetchVideos = async (videoId) => {
+    try {
+      const url = `https://schools.fabulearn.net/api/bliss/videos/485/recommendation`;
+      console.log('Making request to:', url);
+      const response = await axios.get(url);
+      const data = response.data;
+      
+      if (data.success) {
+ 
+        const videos = Object.values(data.data.recommendation);
+        setWatchHistoryVideos(videos);
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos(videoId);
+  }, []);
+
+
+
+  const handleVideoPress = (video) => {
+    // Navigate to the VideoVideo screen
+    navigation.navigate('HomeVideo', {video});
+  };
+
+    
   return (
     <SafeAreaView style={[styles.container, activePage === '系統挑戰' ? styles.container : styles.containerBlue]}>
       <ScrollView style={styles.content}>
       <Header />
+      
       {activePage === '系統挑戰' ? (
           <View style={styles.container00}>
           <View style={styles.container1}>
@@ -67,29 +115,61 @@ const HomeScreen = () => {
 
 
         <View style={styles.container2}>
-          <View style = {styles.watchHistory}>
-            <Text style = {styles.watchHistoryText}> 觀看記錄</Text>
+          <View style={styles.watchHistory}>
+            <Text style={styles.watchHistoryText}>觀看記錄</Text>
           </View>
           <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
-            {Array.from({ length: 10 }, (_, index) => (
-              <View key={index} style={styles.videoThumbnail}>
-                <Text style={styles.videoText}>Video {index + 1}</Text>
+            {watchHistoryVideos.map((video, index) => (
+              <View key={index} style={styles.videoContainer}>
+                <TouchableOpacity style={styles.videoThumbnail} onPress={() => setSelectedVideo(video.video_path)}>
+                  <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                  <View style={styles.playButtonContainer}>
+                    <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
+                  </View>
+                </TouchableOpacity>
+                <View style={styles.videoDetails}>
+                <Text style={styles.videoText}>{video.title}</Text>
+                <View style={styles.termsContainer}>
+                  {video.hashtag.map((term, index) => (
+                      <TouchableOpacity key={index} style={styles.term}>
+                          <Text style={styles.termText}>{term}</Text>
+                      </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
               </View>
             ))}
           </ScrollView>
         </View>
 
+       
+
         <View style={styles.container3}>
           <View style = {styles.watchHistory}>
-            <Text style = {styles.watchHistoryText}>推薦影片</Text>
-          </View>
-          <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
-            {Array.from({ length: 10 }, (_, index) => (
-              <View key={index} style={styles.videoThumbnail}>
-                <Text style={styles.videoText}>Video {index + 1}</Text>
+              <Text style = {styles.watchHistoryText}>推薦影片</Text>
+            </View>
+            <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
+            {watchHistoryVideos.map((video, index) => (
+              <View key={index} style={styles.videoContainer}>
+                <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
+                    <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                    <View style={styles.playButtonContainer}>
+                      <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
+                    </View>
+                </TouchableOpacity>
+                <View style={styles.videoDetails}>
+                  <Text style={styles.videoText}>{video.title}</Text>
+                  <View style={styles.termsContainer}>
+                    {video.hashtag.map((term, index) => (
+                        <TouchableOpacity key={index} style={styles.term}>
+                            <Text style={styles.termText}>{term}</Text>
+                        </TouchableOpacity>
+                    ))}
+                  </View>
+              </View>
               </View>
             ))}
-          </ScrollView>
+            </ScrollView>
         </View>
 
         <View style={styles.container4}>
@@ -97,11 +177,26 @@ const HomeScreen = () => {
             <Text style = {styles.watchHistoryText}>推薦影片</Text>
           </View>
           <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
-            {Array.from({ length: 10 }, (_, index) => (
-              <View key={index} style={styles.videoThumbnail}>
-                <Text style={styles.videoText}>Video {index + 1}</Text>
+          {watchHistoryVideos.map((video, index) => (
+            <View key={index} style={styles.videoContainer}>
+              <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
+                  <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                  <View style={styles.playButtonContainer}>
+                    <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
+                  </View>
+              </TouchableOpacity>
+              <View style={styles.videoDetails}>
+                <Text style={styles.videoText}>{video.title}</Text>
+                <View style={styles.termsContainer}>
+                  {video.hashtag.map((term, index) => (
+                      <TouchableOpacity key={index} style={styles.term}>
+                          <Text style={styles.termText}>{term}</Text>
+                      </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            ))}
+            </View>
+          ))}
           </ScrollView>
         </View>
 
@@ -293,8 +388,8 @@ const styles = StyleSheet.create({
 
   container2: {
     backgroundColor: '#fffcec',
-    paddingTop: '10%',
-    paddingBottom: '10%',
+    paddingTop: '5%',
+    paddingBottom: '5%',
     borderTopLeftRadius: 25, 
   },
 
@@ -308,9 +403,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 
+
+  
   videoScrollView: {
     marginTop: '5%',
     marginLeft: '5%',
+  },
+
+  videoContainer: {
+    width: 220,
+    alignItems: 'center',
+    flexDirection:'column',
+    
   },
 
   videoThumbnail: {
@@ -322,12 +426,81 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  videoText: {
-    color: 'white',
-    fontSize: 16,
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  playButtonContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+  },
+  playButton: {
+    width: 50,
+    height: 50,
+  },
+  videoDetails: {
+    width: '90%', 
   },
 
+  videoText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginTop: 10,
+    marginBottom: 10,
+    flexWrap:'wrap',
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    maxWidth: '90%', 
+    
+    columnGap: 20,
+    rowGap: 5, 
+},
+term: {
+    borderRadius: 5,
+    flexShrink: 1,
+},
+termText: {
+    fontSize: 14,
+    color: '#00A3A3',
+},
+
+  videoPlayerContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+  },
+  videoPlayer: {
+    width: '100%',
+    height: '100%',
+  },
+
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+
+
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 15,
+    padding: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  
   container3: {
     backgroundColor: '#fffcec',
     paddingBottom: '10%',

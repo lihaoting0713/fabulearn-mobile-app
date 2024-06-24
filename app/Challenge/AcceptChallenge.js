@@ -4,6 +4,7 @@ import { Alert, Modal, Dimensions,  StyleSheet, View, Text, TextInput, Touchable
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
+import axios from 'axios'; 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
@@ -13,12 +14,13 @@ console.log(width)
 
 const AcceptChallenge = () => {
     const navigation = useNavigation();
-    const [activePage, setActivePage] = useState(''); 
+
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [selectedOption, setSelectedOption] = useState('挑戰者');
-    const [backAlertVisible, setBackAlertVisible] = useState(false);
+    const [ChallengeDetails, setChallengeDetails] = useState([]);
+   
 
 
     useEffect(() => {
@@ -48,31 +50,44 @@ const AcceptChallenge = () => {
       };
     
 
-    const Card = ({ title, count, onPress }) => {
-        return (
-          <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>{title}</Text>
-                <View style={styles.iconContainer}>
-                    <Text style={styles.cardCount}>{count}</Text>
-                </View>
-            </View>
-                <View style={styles.cardRectangle} />
-            
-            
-          </TouchableOpacity>
-        );
-      };    
-
-      const handleBackButtonPress = () => {
-        setBackAlertVisible(true);
+      const fetchChallenges = async () => {
+        try {
+          const url = 'http://192.168.18.12/api/bliss/challenges';
+          const params = {
+            approach: 'habit',
+          };
+    
+          console.log('Making request to:', url, 'with params:', params);
+          const response = await axios.get(url, { params });
+          console.log('Full Response:', response);
+    
+          const data = response.data;
+          console.log('Response Data:', data);
+    
+          if (data.success) {
+            const challenge = Object.values(data.data.results);
+            setChallengeDetails(challenge);
+            console.log('Challenge Details:', challenge);
+          } else {
+            console.error('Failed to fetch challenges:', data.error);
+          }
+        } catch (error) {
+          console.error('Error fetching challenges:', error.message);
+          if (error.response) {
+            console.error('Error response data:', error.response.data);
+          }
+        }
       };
     
-      const handleBackAlertConfirm = () => {
-        setBackAlertVisible(false);
-        setActivePage(''); 
-      };
+      useEffect(() => {
+        fetchChallenges();
+      }, []);
+    
 
+
+      console.log(ChallengeDetails)
+
+    
       
       const data = [
         {
@@ -144,7 +159,7 @@ const AcceptChallenge = () => {
                     />
                 </View>
             )}
-                {data.map((item) => (
+                {ChallengeDetails.map((item) => (
                     <View key={item.id} style={styles.aCCard}>
                         <View style={styles.aCCardHeader}>
                             <View style={styles.aCCardTitle1}>
