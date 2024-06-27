@@ -77,7 +77,7 @@ function CreateAccount() {
                 style={styles.eyeIcon}
               >
                 <Feather
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye" : "eye-off"}
                   size={24}
                   color="gray"
                 />
@@ -99,7 +99,7 @@ function CreateAccount() {
                 style={styles.eyeIcon}
               >
                 <Feather
-                  name={showPassword ? "eye-off" : "eye"}
+                  name={showPassword ? "eye" : "eye-off"}
                   size={24}
                   color="gray"
                 />

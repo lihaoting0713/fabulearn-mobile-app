@@ -1,11 +1,13 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, SafeAreaView, ScrollView, Image, TouchableOpacity, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as SecureStore from 'expo-secure-store';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Logout() {
-    const [userName, setUserName] = useState('');
+    const [login_id, setlogin_id] = useState('');
     
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +15,50 @@ function Logout() {
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    const Login = async (login_id,password) => {
+        try {
+            console.log(login_id)
+            console.log(password)
+            const formdata = new FormData();
+            formdata.append("login_id", login_id);
+            formdata.append("password", password);
+            const url = "https://schools.fabulearn.net/api/login";
+            const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': "multipart/form-data;"
+            },
+            body: formdata
+            });
+            const data = await response.json();
+            console.log(data);
+                const tabID = generateRandomInteger();
+                console.log("generated:",tabID)
+                await storeTabID(tabID);
+            console.log("tabID: ",await getStoredTabID())
+            
+        } catch (error) {
+            console.warn(error);
+        }
+    };
+
+    const generateRandomInteger = () => {
+        return Math.floor(Math.random() * 1000000);
+    };
+
+    async function storeTabID(value) {
+        await SecureStore.setItemAsync("tabID", value.toString());
+    }
+      
+    async function getStoredTabID() {
+        const result = await SecureStore.getItemAsync("tabID");
+        if (result) {
+          return result;
+        } else {
+          console.log('No values stored under that key.');
+        }
+    }
     
     const navigation = useNavigation();
 
@@ -33,22 +79,24 @@ function Logout() {
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>User Name</Text>
                         <TextInput
+                        autoCapitalize='none'
                             style={styles.input}
-                            value={userName}
-                            onChangeText={setUserName}
+                            value={login_id}
+                            onChangeText={setlogin_id}
                         />
                     </View>
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>Password</Text>
                         <View style={styles.passwordInputContainer}>
                             <TextInput
+                            autoCapitalize='none'
                                 style={styles.pwinput}
                                 value={password}
                                 onChangeText={setPassword}
                                 secureTextEntry={!showPassword}
                             />
                             <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
-                                <Feather name={showPassword ? 'eye-off' : 'eye'} size={24} color="gray" />
+                                <Feather name={showPassword ? 'eye' : 'eye-off'} size={24} color="gray" />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -59,7 +107,7 @@ function Logout() {
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.confirmButton}>
+                    <TouchableOpacity style={styles.confirmButton} onPress={()=>(Login(login_id,password))}>
                         <Text style={styles.confirmButtonText}>確認</Text>
                     </TouchableOpacity>
 
@@ -156,8 +204,7 @@ const styles = StyleSheet.create({
         marginTop: 15,
     },
     confirmButton: {
-        position: 'absolute',
-        bottom: 100,
+        top: 100,
         width: '100%',
         height: 50,
         backgroundColor: '#00A3A3',
@@ -171,7 +218,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     createaccontainer: {
-        position: 'absolute',
+        top: 110,
         bottom: 75,
         width: '100%',
     },
