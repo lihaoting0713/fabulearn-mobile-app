@@ -11,6 +11,7 @@ function Logout() {
     
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [loginfailed, setLoginFailed] = useState(false);
     
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -33,11 +34,25 @@ function Logout() {
             });
             const data = await response.json();
             console.log(data);
-                const tabID = generateRandomInteger();
-                console.log("generated:",tabID)
-                await storeTabID(tabID);
-            console.log("tabID: ",await getStoredTabID())
-            
+            if(data.success === true){
+                console.log("login success")
+                await storelogin("true");
+                console.log("login status: ",await SecureStore.getItemAsync("Logined"))
+                if(SecureStore.getItemAsync("tabID")==null){
+                    const tabID = generateRandomInteger();
+                    console.log("generated:",tabID)
+                    await storeTabID(tabID);
+                    console.log("generated new tabID: ",await getStoredTabID())
+                }
+                else{
+                    console.log("tabID already exists: ",await getStoredTabID())
+                }
+                navigation.navigate('HomeScreen');
+            }
+            else{
+                console.log("login failed")
+                setLoginFailed(true);
+            }
         } catch (error) {
             console.warn(error);
         }
@@ -50,6 +65,10 @@ function Logout() {
     async function storeTabID(value) {
         await SecureStore.setItemAsync("tabID", value.toString());
     }
+
+    async function storelogin(data) {
+        await SecureStore.setItemAsync("Logined", data);
+    }
       
     async function getStoredTabID() {
         const result = await SecureStore.getItemAsync("tabID");
@@ -57,6 +76,7 @@ function Logout() {
           return result;
         } else {
           console.log('No values stored under that key.');
+          return null;
         }
     }
     
@@ -67,9 +87,9 @@ function Logout() {
             <ScrollView style={styles.scroll} contentContainerStyle={styles.contentContainer}>
                 <View style={styles.content}>
                     <View style={styles.topBar}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
+                        {/*<TouchableOpacity onPress={() => navigation.goBack()}>
                             <Ionicons name="chevron-back" size={40} color="#00A3A3" />
-                        </TouchableOpacity>
+                        </TouchableOpacity>*/}
                     </View>
 
                     <View style={styles.logocontainer}>
@@ -107,7 +127,9 @@ function Logout() {
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.confirmButton} onPress={()=>(Login(login_id,password))}>
+                    <TouchableOpacity style={styles.confirmButton} onPress={()=>{
+                        Login(login_id,password)
+                    }}>
                         <Text style={styles.confirmButtonText}>確認</Text>
                     </TouchableOpacity>
 

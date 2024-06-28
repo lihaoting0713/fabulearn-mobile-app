@@ -15,12 +15,13 @@ import {
 import * as Clipboard from 'expo-clipboard';
 import {Ionicons,Octicons,MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
 import {BottomSheetModal,BottomSheetModalProvider,BottomSheetScrollView,} from "@gorhom/bottom-sheet";
-import {GestureHandlerRootView,TextInput,} from "react-native-gesture-handler";
+import {GestureHandlerRootView,TextInput} from "react-native-gesture-handler";
 import {Menu, MenuOptions, MenuOption, MenuTrigger, MenuProvider} from 'react-native-popup-menu';
 import { useNavigation } from "@react-navigation/native";
 import { SvgUri } from "react-native-svg";
 import {Video} from 'expo-av';
 import * as SecureStore from 'expo-secure-store';
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
 
 
 function PlayVideos({route}) {
@@ -302,8 +303,10 @@ const subjectinchinese = {
     await console.log("TABID: ",TABID)
     await videoaccess(videoid,tabID);
     await getnotedata(videoid);
+    await getexercisedata(videoid);
     await getlearnvideo(videoid);
     await getrecommendvideo(videoid);
+    await handlePresentModalPress(notebottomSheetModalRef)
     await setisloading(false);
   };
 
@@ -323,6 +326,9 @@ const subjectinchinese = {
 
   const notebottomSheetModalRef = useRef(null);
   const videobottomSheetModalRef = useRef(null);
+  const exercisebottomSheetModalRef = useRef(null);
+  const relateagebottomSheetModalRef = useRef(null);
+  const recommendbottomSheetModalRef = useRef(null);
   
   const snapPoints = useMemo(() => ["45%", "90%", "100%"], []);
 
@@ -387,9 +393,7 @@ const subjectinchinese = {
       const response = await fetch(url);
       const data = await response.json();
       console.log("notes: ",data["data"])
-      if(data["data"].length != 0 && data["data"]!=undefined && data["data"]!=null){
       setnoteNum(data["data"].length);
-      }
       setNotelist(data["data"]);
       console.log("setnotelistdata")
       setisnoteloading(false);
@@ -401,6 +405,9 @@ const subjectinchinese = {
 
   const writenote = async (videoid,message,time) => {
     try {
+      if(time==undefined){
+        time=0;
+      }
       setisnoteloading(true);
       console.log("newnote creating:",message,time,"videoid:",videoid)
       const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/notes`;
@@ -512,69 +519,147 @@ const subjectinchinese = {
 
   //exercise
 
-  const exerciseData = [
-    {
-      id: '1',
-      question: 'What is the capital of France?',
-      options: ['A. Berlin', 'B. Madrid', 'C. Paris', 'D. Rome'],
-      answer: 'C. Paris',
-      explanation: 'The capital of France is Paris.',
-    },
-    {
-      id: '2',
-      question: 'What is the chemical symbol for water?',
-      options: ['A. H2O', 'B. CO2', 'C. O2', 'D. H2'],
-      answer: 'A. H2O',
-      explanation: 'The chemical symbol for water is H2O.',
-    },
-    // Add more exercise data as needed
-  ];
-
-    const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [currentExercise,setcurrentExercise] = useState({
+      id: 2231, 
+      title: "遞進複句在後面的分句表達在程度、範圍上怎樣的意思？",
+      options: {
+          0: {
+              alphabet: "a", 
+              content: "a. 更左一層", 
+          }, 
+          1: {
+              alphabet: "b", 
+              content: "b. 更右一層", 
+          }, 
+          2: {
+              alphabet: "c", 
+              content: "c. 更退一層", 
+          }, 
+          3: {
+              alphabet: "d", 
+              content: "d. 更進一層", 
+          }, 
+      }, 
+      previous_answer: "b", 
+      correct_answer: "d", 
+      correct: "false", 
+      feedback: "遞進複句的前面的分句表達一個意思，後面的分句表達在程度、範圍上更進一層的意思。", 
+  })
+  
+    const [hasexercise, setHasexercise] = useState(false);
+    const [currentQuestion, setCurrentQuestion] = useState(1);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [totalquestionnum, setTotalquestionnum] = useState(2);
     const [submitted, setSubmitted] = useState(false);
-    const [answers, setAnswers] = useState(Array(exerciseData.length).fill(null));
-    const [submissions, setSubmissions] = useState(Array(exerciseData.length).fill(false));
+    const [correctanswer, setCorrectanswer] = useState(null);
+    const [isCorrect,setIsCorrect] = useState(false);
+    const [isexerciseloading, setisexerciseloading] = useState(true);
+    const [feedback,setFeedback] = useState("")
+
 
     const handleOptionPress = (option) => {
-      if (!submitted) {
+        setSubmitted(false);
         setSelectedOption(option);
-      }
     };
 
-    const handleConfirmPress = () => {
+    const handleConfirmPress = (videoid,questionnum,selectedOption,session_id) => {
       if (selectedOption) {
         setSubmitted(true);
-        const newAnswers = [...answers];
-        const newSubmissions = [...submissions];
-        newAnswers[currentQuestion] = selectedOption;
-        newSubmissions[currentQuestion] = true;
-        setAnswers(newAnswers);
-        setSubmissions(newSubmissions);
+        console.log(selectedOption)
+        submitquestion(videoid,questionnum,selectedOption,session_id);
       }
     };
 
-    const handleNextPress = () => {
-      if (currentQuestion < exerciseData.length - 1) {
+    const handleNextPress = (videoid,currentQuestion) => {
+      if (currentQuestion < totalquestionnum) {
+        setSubmitted(false);
+        setSelectedOption(null)
+        getquestiondata(videoid,currentQuestion+1);
         setCurrentQuestion((prev) => prev + 1);
-        resetState(currentQuestion + 1);
       }
     };
 
-    const handlePrevPress = () => {
-      if (currentQuestion > 0) {
+    const handlePrevPress = (videoid,currentQuestion) => {
+      if (currentQuestion > 1) {
+        setSubmitted(false);
+        setSelectedOption(null)
+        getquestiondata(videoid,currentQuestion-1);
         setCurrentQuestion((prev) => prev - 1);
-        resetState(currentQuestion - 1);
       }
     };
 
-    const resetState = (questionIndex) => {
-      setSelectedOption(answers[questionIndex]);
-      setSubmitted(submissions[questionIndex]);
-    };
+    const [session_id , setSession_id] = useState("");
 
-    const currentExercise = exerciseData[currentQuestion];
-    const progress = (currentQuestion + 1) / exerciseData.length;
+    const getexercisedata = async (videoid) => {
+      try {
+        const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/exercises`;
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log("exercises: ",data["data"])
+        if(data["data"]){
+        setHasexercise(true);
+        setSession_id(data["data"].session_id);
+        setTotalquestionnum(data["data"].total_number_of_questions);
+        }
+      }
+      catch (error) {
+        console.warn(error);
+      }
+    }
+
+    const getquestiondata = async (videoid,questionnum) => {
+      try {
+        setisexerciseloading(true);
+        const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/exercises/1/questions/${questionnum}`;
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log("question: ",data["data"])
+        if(data["data"]){
+        setcurrentExercise(data["data"])
+        console.log("currentExercise:",currentExercise)
+        if(data["data"].previous_answer!=null||data["data"].previous_answer!=""){
+          setSubmitted(true);
+          setSelectedOption(data["data"].previous_answer);
+          setIsCorrect(data["data"].correct);
+          if(!data["data"].correct){
+            setFeedback(data["data"].feedback);
+          }
+        }
+      }
+        setisexerciseloading(false);
+      }
+      catch (error) {
+        console.warn(error);
+      }
+    }
+
+    const submitquestion = async (videoid,questionnum,answer,session_id) => {
+      try {
+        setisexerciseloading(true);
+        const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/exercises/1/questions/${questionnum}/submit`;
+        const body = new FormData();
+        body.append("answer", answer);
+        body.append("session_id", session_id);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': "multipart/form-data;"
+          },
+          body : body
+        });
+        const data = await response.json();
+        console.log(data["data"])
+        if(data["data"].correct){
+          setCorrectanswer(data["data"].correct_answer);
+      }
+      setFeedback(data["data"].feedback);
+      setIsCorrect(data["data"].correct);
+      console.log("isCorrect:",isCorrect)
+      setisexerciseloading(false);
+      } catch (error) {
+        console.warn(error);
+      }
+    };
 
 
   useEffect(() => {
@@ -695,90 +780,126 @@ const subjectinchinese = {
                 style={styles.button}
                 onPress={()=>handlePresentModalPress(notebottomSheetModalRef)}
                 >
-                <Text style={styles.buttonnumText}>{noteNum}</Text>
+                <Text style={styles.buttonnumText}>{noteNum?noteNum:null}</Text>
                 <Octicons name="pencil" size={24} color="#00A3A3" />
                 <Text style={styles.buttonText}>筆記</Text>
               </TouchableOpacity>
 
+              {hasexercise?
+                <>
               <TouchableOpacity style={styles.button} onPress={()=>{
-                handlePresentModalPress(videobottomSheetModalRef)
+                handlePresentModalPress(exercisebottomSheetModalRef)
+                getquestiondata(videoid,currentQuestion);
                 }}>
-              {isStar ?<Ionicons name="star" size={24} color="#00A3A3"/>:
                 <Ionicons name="star-outline" size={24} color="#00A3A3" />
-              }
-                <Text style={styles.buttonText}>推薦</Text>
-              </TouchableOpacity>
+                <Text style={styles.buttonText}>練習</Text>
+                </TouchableOpacity>
 
               <TouchableOpacity style={styles.button} onPress={()=>{
                 handlePresentModalPress(videobottomSheetModalRef)
               }}>
-              {isSave ?<Ionicons name="briefcase" size={24} color="#00A3A3"/>:
                 <Ionicons name="briefcase-outline" size={24} color="#00A3A3" />
-              }
                 <Text style={styles.buttonText}>推薦</Text>
-              </TouchableOpacity>
+                </TouchableOpacity>
+              </>
+              :
+              <>
+              {learnvideolist.length>0?
+              <TouchableOpacity style={styles.button} onPress={()=>{
+                handlePresentModalPress(relateagebottomSheetModalRef)
+              }}>
+                <Ionicons name="briefcase-outline" size={24} color="#00A3A3" />
+                <Text style={styles.buttonText}>學習包</Text>
+                </TouchableOpacity>
+              :null}
+                <TouchableOpacity style={styles.button} onPress={()=>{
+                handlePresentModalPress(recommendbottomSheetModalRef)
+              }}>
+                <Ionicons name="briefcase-outline" size={24} color="#00A3A3" />
+                <Text style={styles.buttonText}>推薦</Text>
+                </TouchableOpacity>
+              
+              </>
+            }
 
             </View>
             </View>
 
-            <BottomSheetModal>
+
+            <BottomSheetModal
+            ref={exercisebottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            backgroundStyle={{ borderRadius: 20,backgroundColor:'#fffcec'}}
+            >
             <View style={styles.exerciseContainer}>
             <View style={styles.progressContainer}>
               <Text style={styles.progressLabel}>練習</Text>
               <View style={styles.progressBarBackground}>
-                <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+                <View style={[styles.progressBar, { width: `${currentQuestion/totalquestionnum * 100}%` }]} />
               </View>
-              <Text style={styles.progressText}>{`${currentQuestion + 1}/${exerciseData.length}`}</Text>
+              <Text style={styles.progressText}>{`${currentQuestion}/${totalquestionnum}`}</Text>
             </View>
-            <View style={styles.exerciseItem}>
-              <Text style={styles.exerciseQuestion}>{currentExercise.question}</Text>
-              {currentExercise.options.map((option, index) => {
-                const isSelected = selectedOption === option;
-                const isCorrect = option === currentExercise.answer;
-                const isIncorrect = submitted && isSelected && !isCorrect;
-                const optionStyle = !submitted && isSelected ? styles.selectedOption : styles.exerciseOption;
-                const submittedStyle = isIncorrect ? styles.incorrectOption : isCorrect && submitted ? styles.correctOption : {};
 
-                return (
-                  <TouchableOpacity
-                    key={index}
-                    style={[optionStyle, submittedStyle, styles.optionContainer]}
-                    onPress={() => handleOptionPress(option)}
-                  >
-                    <Text>{option}</Text>
-                    {submitted && isCorrect && (
-                      <Ionicons name="checkmark-circle" size={24} color="green" style={styles.optionIcon} />
-                    )}
-                    {submitted && isIncorrect && (
-                      <Ionicons name="close-circle" size={24} color="red" style={styles.optionIcon} />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-              {submitted && (
+            {isexerciseloading ?
+            <View>
+              <ActivityIndicator size="large"/>
+            </View>
+            :
+              <>
+            <View style={styles.exerciseItem}>
+              <Text style={styles.exerciseQuestion}>{currentExercise.title}</Text>
+
+              {Object.values(currentExercise.options).map((option, index) => {
+  const isSelected = selectedOption === option.alphabet;
+  const isIncorrect = submitted && isSelected && !isCorrect;
+  const optionStyle = !submitted && isSelected ? styles.selectedOption : styles.exerciseOption;
+  const submittedStyle = isIncorrect ? styles.incorrectOption : isCorrect && submitted && isSelected? styles.correctOption : null;
+
+  return (
+    <TouchableOpacity
+      key={index}
+      style={[optionStyle,submittedStyle ,styles.optionContainer]}
+      onPress={() => handleOptionPress(option.alphabet)}
+    >
+      <Text>{option.content}</Text>
+      {(submitted && isCorrect &&  isSelected)&&(
+        <Ionicons name="checkmark-circle" size={24} color="green" style={styles.optionIcon} />
+      )}
+      {(submitted && isIncorrect &&  isSelected)&&(
+        <Ionicons name="close-circle" size={24} color="red" style={styles.optionIcon} />
+      )}
+    </TouchableOpacity>
+  );
+})}
+
+              {(submitted && isCorrect==false)&&(
                 <View style={styles.explanationContainer}>
-                  <Text style={styles.explanationText}>{currentExercise.explanation}</Text>
+                  <Text style={styles.explanationText}>{feedback}</Text>
                 </View>
               )}
             </View>
+          
             <View style={styles.exerciseButtons}>
-              <TouchableOpacity style={styles.exerciseButton} onPress={handlePrevPress} disabled={currentQuestion === 0}>
+              <TouchableOpacity style={styles.exerciseButton} onPress={()=>{handlePrevPress(videoid,currentQuestion)}} disabled={currentQuestion === 1}>
                 <Text style={styles.exerciseButtonText}>上一條</Text>
               </TouchableOpacity>
               {submitted ? (
-                <TouchableOpacity style={styles.exerciseButton} onPress={handleNextPress}>
+                <TouchableOpacity style={styles.exerciseButton} onPress={()=>{handleNextPress(videoid,currentQuestion)}} disabled={currentQuestion === totalquestionnum}>
                   <Text style={styles.exerciseButtonText}>下一條</Text>
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity style={styles.exerciseButton} onPress={handleConfirmPress}>
+                <TouchableOpacity style={styles.exerciseButton} onPress={()=>{handleConfirmPress(videoid,currentQuestion,selectedOption,session_id)}}>
                   <Text style={styles.exerciseButtonText}>確認</Text>
                 </TouchableOpacity>
               )}
             </View>
+            </>
+          }
           </View>
-            </BottomSheetModal>
-            
-            <BottomSheetModal
+          </BottomSheetModal>
+          
+          <BottomSheetModal
             ref={videobottomSheetModalRef}
             index={0}
             snapPoints={snapPoints}
@@ -791,8 +912,35 @@ const subjectinchinese = {
             </View>
               </BottomSheetScrollView>
             </BottomSheetModal>
+
+            <BottomSheetModal
+            ref={relateagebottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            backgroundStyle={{ borderRadius: 20, backgroundColor: "#f7f7e3"}}
+            >
+              <BottomSheetScrollView style={{flex:1}}>
+            <View style={styles.allsection}>
+              {learnvideolist.length>0 ?<VideoList title="學習包影片" data={learnvideolist} />:null}
+            </View>
+              </BottomSheetScrollView>
+            </BottomSheetModal>
+
+            <BottomSheetModal
+            ref={recommendbottomSheetModalRef}
+            index={0}
+            snapPoints={snapPoints}
+            backgroundStyle={{ borderRadius: 20, backgroundColor: "#f7f7e3"}}
+            >
+              <BottomSheetScrollView style={{flex:1}}>
+            <View style={styles.allsection}>
+              <VideoList title="推薦影片" data={recommendvideolist} />
+            </View>
+              </BottomSheetScrollView>
+            </BottomSheetModal>
             </>
               }
+
           </ScrollView>
 
         </SafeAreaView>
