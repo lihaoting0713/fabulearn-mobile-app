@@ -595,8 +595,9 @@ const subjectinchinese = {
         const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/exercises`;
         const response = await fetch(url);
         const data = await response.json();
-        console.log("exercises: ",data["data"])
-        if(data["data"]){
+        console.log("exercises: ",data)
+        console.log(data.data)
+        if(data.data.length>0){
         setHasexercise(true);
         setSession_id(data["data"].session_id);
         setTotalquestionnum(data["data"].total_number_of_questions);
@@ -696,6 +697,10 @@ const subjectinchinese = {
                   setRefreshing(true);
                   setisloading(true);
                   setisvideoClicked(false);
+                  notebottomSheetModalRef.current?.dismiss()
+                  videobottomSheetModalRef.current?.dismiss()
+                  exercisebottomSheetModalRef.current?.dismiss()
+                  relateagebottomSheetModalRef.current?.dismiss()
                   fetchVideoData();
                   setRefreshing(false);
                 }}
