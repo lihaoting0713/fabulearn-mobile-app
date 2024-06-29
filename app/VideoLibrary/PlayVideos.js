@@ -357,8 +357,9 @@ const subjectinchinese = {
                 <Entypo name="new" size={20} color="#00A3A3" style={{position:"absolute",right:0}}/>
                 :null}
                 {item.is_read==true?
-                <Ionicons name="checkmark-done" size={20} color="#00A3A3" style={{position:"absolute",right:0,bottom:0}}/>
+                <Ionicons name="checkmark-done" size={20} color="#00A3A3" style={{position:"absolute",left:0}}/>
                 :null}
+                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{item.duration.string}</Text>
               </TouchableOpacity>
               <View style={styles.videoDetails}>
                 <View style={styles.videotop}>
@@ -546,7 +547,7 @@ const subjectinchinese = {
       feedback: "遞進複句的前面的分句表達一個意思，後面的分句表達在程度、範圍上更進一層的意思。", 
   })
   
-    const [hasexercise, setHasexercise] = useState(false);
+    const [hasexercise, setHasexercise] = useState(true);
     const [currentQuestion, setCurrentQuestion] = useState(1);
     const [selectedOption, setSelectedOption] = useState(null);
     const [totalquestionnum, setTotalquestionnum] = useState(2);
@@ -597,7 +598,10 @@ const subjectinchinese = {
         const data = await response.json();
         console.log("exercises: ",data)
         console.log(data.data)
-        if(data.data.length>0){
+        if(data.data.session_id==null){
+          setHasexercise(false);
+        }
+        else{
         setHasexercise(true);
         setSession_id(data["data"].session_id);
         setTotalquestionnum(data["data"].total_number_of_questions);
@@ -732,8 +736,6 @@ const subjectinchinese = {
                 </View>
                 <View style={styles.titleandtermLarge}>
                   <Text style={styles.videoTitleLarge}
-                    numberOfLines={1} 
-                    ellipsizeMode="tail"
                   >
                     {featuredVideo.title}
                   </Text>
@@ -768,6 +770,7 @@ const subjectinchinese = {
                     <TouchableOpacity onPress={()=>setisvideoClicked(true)}>
                     <Image source={{ uri: featuredVideo.thumbnail }} style={styles.thumbnailLarge} />
                     <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={{position:"absolute",top:65,right:125}}/>
+                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideo.duration.string}</Text>
                     </TouchableOpacity>
               }
               </View>
@@ -1243,7 +1246,7 @@ const styles = StyleSheet.create({
   videoTitleLarge: {
     fontSize: 16,
     fontWeight: "bold",
-    width: "70%",
+    width: "85%",
   },
   termTextLarge: {
     fontSize: 12,

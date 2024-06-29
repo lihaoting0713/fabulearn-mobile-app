@@ -266,7 +266,7 @@ function close() {
                 <Entypo name="new" size={40} color="#00A3A3" style={{position:"absolute",right:0}}/>
                 :null}
                 {item.is_read==true?
-                <Ionicons name="checkmark-done" size={40} color="#00A3A3" style={{position:"absolute",right:0,bottom:0}}/>
+                <Ionicons name="checkmark-done" size={40} color="#00A3A3" style={{position:"absolute",left:0}}/>
                 :null}
               </View>
             </TouchableOpacity>
