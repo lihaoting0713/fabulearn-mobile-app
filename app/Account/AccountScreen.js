@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, SafeAreaView, FlatList, ScrollView, Image, Touc
 import { Ionicons, Octicons, SimpleLineIcons, Feather, AntDesign } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import BottomNavBar from '../components/BottomNavBar';
+import * as SecureStore from 'expo-secure-store';
 
 function AccountScreen({navigation}) {
 
@@ -15,6 +16,10 @@ function AccountScreen({navigation}) {
       );
       const data = await response.json();
       console.log("logout: ",data);
+      await SecureStore.setItemAsync("isLogin", "false");
+      await SecureStore.deleteItemAsync("Logined");
+      console.log("isLogin status: ",await SecureStore.getItemAsync("isLogin"));
+      console.log("Logined status: ",await SecureStore.getItemAsync("Logined"));
     } catch (error) {
       console.warn(error);
     }

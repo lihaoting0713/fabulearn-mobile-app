@@ -1,6 +1,6 @@
 // App.js
 import 'react-native-gesture-handler';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './HomeScreen'; // Ensure correct path
@@ -12,16 +12,22 @@ import StartChallenge from './Challenge/StartChallenge1';
 import AccountStack from './AccountStack';
 import StudyPackageStack from './StudyPackageStack';
 import Notification from './Notifications';
+import * as SecureStore from 'expo-secure-store';
 
 const Stack = createNativeStackNavigator();
 
+
 const App = () => {
+  
+  const [setislogin, setisLogin] = useState(false);
+  const [initalroute, setinitialroute] = useState("AccountStack");
+
   
   return (
     <NavigationContainer>
       <Header />
       
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName={initalroute}>
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Challenge" component={ChallengeScreen} />
         <Stack.Screen name="VideoStack" component={VideoStack} />

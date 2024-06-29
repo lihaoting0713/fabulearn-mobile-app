@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function Logout() {
     const [login_id, setlogin_id] = useState('');
@@ -68,6 +67,7 @@ function Logout() {
 
     async function storelogin(data) {
         await SecureStore.setItemAsync("Logined", data);
+        await SecureStore.setItemAsync("isLogin", "true");
     }
       
     async function getStoredTabID() {
@@ -122,7 +122,7 @@ function Logout() {
                     </View>
 
                     <View style={styles.forgotpwcontainer}>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={()=>navigation.navigate("ForgetPassword")}>
                         <Text style={{textAlign:'right'}}>Forgot password</Text>
                         </TouchableOpacity>
                     </View>

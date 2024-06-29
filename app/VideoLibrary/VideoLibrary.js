@@ -13,13 +13,12 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons ,Entypo,Octicons,AntDesign} from "@expo/vector-icons";
-import React, { useState, useEffect, useMemo,useCallback } from "react";
+import React, { useState, useEffect, useMemo,useCallback,useRef } from "react";
 import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBar component
 import { SvgUri } from "react-native-svg";
 import { Picker } from "@react-native-picker/picker";
-import { useRef } from "react";
 import { useNavigation } from "@react-navigation/native";
-import axios from "axios";
+
 
 function VideoLibrary({ route }) {
   const navigation = useNavigation();
@@ -41,7 +40,7 @@ function VideoLibrary({ route }) {
   const [videolist, setVideolist] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [pagenum, setPagenum] = useState(1);
-  const [isloading, setIsloading] = useState(true);
+  const [isloading, setIsloading] = useState(false);
   const [isscreenloading, setIsscreenloading] = useState(true);
   const [searchsort,setsearchsort] = useState("name")
   const [searchsubject,setsearchsubject] = useState("chinese")
@@ -73,7 +72,7 @@ const deletehashtag = (hashtag) => {
   const getAPIdata = async () => {
     try {
       console.log("selectedsubject:",selectedSubject);
-      let url = `https://schools.fabulearn.net/api/bliss/videos?&_limit=3&_page=${pagenum}`;
+      let url = `https://schools.fabulearn.net/api/bliss/videos?&limit=${pagenum}`;
       if(selectedSubject){
         url+=`&subject=${selectedSubject}`
       }
@@ -222,7 +221,7 @@ const deletehashtag = (hashtag) => {
 
   const loadmore = () => {
     console.log("loadmore");
-    setPagenum(pagenum + 1);
+    setPagenum(pagenum + 5);
     setIsloading(true);
   }
 
@@ -320,21 +319,7 @@ const deletehashtag = (hashtag) => {
                 :null
               }
 
-      <FlatList
-        data={videolist}
-        keyExtractor={(item) => item.id}
-        onEndReached={searchorfilter?null:loadmore}
-        onRefresh={() => {
-          setRefreshing(true);
-          setPrevioushashtag(null)
-          setHashtags([])
-          getAPIdata();
-          setRefreshing(false);
-        }}
-        refreshing={refreshing}
-        ListHeaderComponent={() => (
-          <>
-            <View style={styles.top}>
+<View style={styles.top}>
                 <>
                 {previoushashtagbackbutton?
                 <TouchableOpacity onPress={() => navigation.goBack()} >
@@ -402,6 +387,23 @@ const deletehashtag = (hashtag) => {
                 </View>
               </ScrollView>
             </View>
+
+      <FlatList
+        data={videolist}
+        keyExtractor={(item) => item.id}
+        onEndReached={searchorfilter?null:loadmore}
+        onRefresh={() => {
+          setRefreshing(true);
+          setPagenum(5)
+          setPrevioushashtag(null)
+          setHashtags([])
+          getAPIdata();
+          setRefreshing(false);
+        }}
+        refreshing={refreshing}
+        ListHeaderComponent={() => (
+          <>
+            
             
             <View marginTop={10}>
               <View flexDirection="row">

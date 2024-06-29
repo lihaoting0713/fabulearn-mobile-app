@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import VideoLibrary from './VideoLibrary/VideoLibrary';
@@ -11,7 +11,7 @@ const SettingStack = createNativeStackNavigator();
 function VideoStack() {
     return (
             <MainStack.Navigator initialRouteName="VideoLibrary" screenOptions={{headerShown:false}}>
-                <MainStack.Screen name="VideoLibrary" component={VideoLibrary} initialParams={{previoushastag:null}}/>
+                <MainStack.Screen name="VideoLibrary" component={VideoLibrary} initialParams={{PREVIOUSHASHTAG:null}}/>
                 <MainStack.Screen name="PlayVideos" component={PlayVideos}/>
             </MainStack.Navigator>
     );

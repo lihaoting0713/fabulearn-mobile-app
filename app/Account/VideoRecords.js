@@ -12,35 +12,135 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons ,Octicons,Entypo} from "@expo/vector-icons";
-import React, { useState, useEffect,useCallback } from "react";
+import { Ionicons, MaterialCommunityIcons ,Entypo,Octicons,AntDesign} from "@expo/vector-icons";
+import React, { useState, useEffect, useMemo,useCallback,useRef } from "react";
 import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBar component
 import { SvgUri } from "react-native-svg";
+import { Picker } from "@react-native-picker/picker";
+import { useNavigation } from "@react-navigation/native";
 
-function VideoRecords({ navigation }) {
+
+function VideoRecords() {
+  const navigation = useNavigation();
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); // State to control modal visibility
-  const [subjectlist, setSubjectlist] = useState([
+  const subjectlist = [
     { text: "中文", id: "subject1", icon: "https://jcblendedlearning.fabulearn.net/assets/chinese.48cf33b0.svg", subject: "chinese" },
     { text: "英文", id: "subject2", icon: "https://jcblendedlearning.fabulearn.net/assets/english.0ba40afe.svg",subject: "english"},
     { text: "數學", id: "subject3", icon: "https://jcblendedlearning.fabulearn.net/assets/math.592e35ec.svg", subject: "math"},
     { text: "科學", id: "subject4", icon: "https://jcblendedlearning.fabulearn.net/assets/science.11cdf6e6.svg", subject: "science"},
     { text: "共通能力", id: "subject5", icon: "https://jcblendedlearning.fabulearn.net/assets/other.4dfe6be8.svg", subject: "other"},
-  ]);
+  ];
 
+  const video = React.useRef(null);
   const [videolist, setVideolist] = useState([]);
-  const [selectedSubject, setSelectedSubject] = useState("");
-  const [pagenum, setPagenum] = useState(1);
-  const [isloading, setIsloading] = useState(false);
+  const [pagenum, setPagenum] = useState(5);
+  const [isloading, setIsloading] = useState(true);
+  const [isscreenloading, setIsscreenloading] = useState(true);
+  const [searchsort,setsearchsort] = useState("name")
+  const [searchsubject,setsearchsubject] = useState("chinese")
+  const [searchdate,setsearchdate] = useState(null)
+  const [searchlength,setsearchlength] = useState(null)
+  const [noresult,setNoresult] = useState(false)
+  const [searchorfilter,setSearchorfilter] = useState(false)
+  const [searchtext,setSearchtext] = useState("")
+  const [refreshing, setRefreshing] = useState(false);
 
+  const pickerRef = useRef();
+
+function open() {
+  pickerRef.current.focus();
+}
+
+function close() {
+  pickerRef.current.blur();
+}
+  
   const getAPIdata = async () => {
     try {
-      console.log(selectedSubject);
-      const url = `https://schools.fabulearn.net/api/bliss/history-videos`;
+      let url = `https://schools.fabulearn.net/api/bliss/history-videos?&limit=${pagenum}`;
       const response = await fetch(url);
       const data = await response.json();
-      console.log(data)
       setVideolist(data["data"]);
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  const getsearchfilterdata = async (searchsort,searchsubject,searchdate,searchlength) => {
+    try {
+      console.log(`searchfilter: sort:${searchsort} subject:${searchsubject} date:${searchdate} length:${searchlength}`);
+      let url = `https://schools.fabulearn.net/api/bliss/history-videos?`;
+
+      const response = await fetch(url);
+      const data = await response.json();
+      let filteredData = data["data"];
+      
+      if (searchdate) {
+        const currentDate = new Date();
+        let compareDate = new Date();
+  
+        if (searchdate === "oneweek") {
+          compareDate.setDate(currentDate.getDate() - 7);
+        } else if (searchdate === "onemonth") {
+          compareDate.setMonth(currentDate.getMonth() - 1);
+        } else if (searchdate === "threemonths") {
+          compareDate.setMonth(currentDate.getMonth() - 3);
+        }
+  
+        filteredData = filteredData.filter(item => new Date(item.added_datetime) >= compareDate);
+      }
+  
+      if (searchlength) {
+        filteredData = filteredData.filter(item => {
+          const [minutes, seconds] = item.duration.string.split(':').map(Number);
+          const totalSeconds = minutes * 60 + seconds;
+          
+          if (searchlength === "onetofive") {
+            return totalSeconds >= 60 && totalSeconds <= 300;
+          } else if (searchlength === "fivetoten") {
+            return totalSeconds > 300 && totalSeconds <= 600;
+          } else if (searchlength === "tenabove") {
+            return totalSeconds > 600;
+          }
+          return true;
+        });
+      }      
+
+      if(searchsubject){
+        filteredData = filteredData.filter(item => item.subject === searchsubject);
+      }
+      if(searchsort){
+        if(searchsort=="name"){
+          filteredData.sort((a, b) => a.title.localeCompare(b.title));
+        }
+        else if(searchsort=="date"){
+          filteredData.sort((a, b) => new Date(b.added_datetime) - new Date(a.added_datetime));
+        }
+      }
+  
+      setVideolist(filteredData);
+      console.log(filteredData)
+      if(filteredData.length==0){
+        setNoresult(true)
+      }
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  const getsearchdata = async (searchtext) => {
+    try {
+      console.log(`searchtext: ${searchtext}`)
+      let url = `https://schools.fabulearn.net/api/bliss/history-videos?`;
+      const response = await fetch(url);
+      const data = await response.json();
+      let searcheddata = data["data"];
+      searcheddata = searcheddata.filter(item => item.title.toLowerCase().includes(searchtext.toLowerCase()));
+      setVideolist(searcheddata);
+      if(searcheddata.length==0){
+        setNoresult(true)
+      }
     } catch (error) {
       console.warn(error);
     }
@@ -63,20 +163,21 @@ function VideoRecords({ navigation }) {
 
   const loadmore = () => {
     console.log("loadmore");
-    setPagenum(pagenum + 1);
+    setPagenum(pagenum + 5);
     setIsloading(true);
   }
-  const [searchtext,setSearchtext] = useState("")
+
   const handleSearchTextChange = useCallback((text) => {
     setSearchtext(text);
   }, []);
   
   return (
     <SafeAreaView style={styles.container}>
-          {showSearchBar ? 
+                {showSearchBar ? 
                 <View style={styles.searchBarContainer} >
                   <TouchableOpacity onPress={() => {
                     setShowSearchBar(false)
+                    setSearchorfilter(false)
                   }}>
                     <Ionicons name="arrow-back" size={30} color="#00A3A3" />
                   </TouchableOpacity>
@@ -87,34 +188,51 @@ function VideoRecords({ navigation }) {
                     value={searchtext}
                     onChangeText={(text) => handleSearchTextChange(text)}
                     onSubmitEditing={() => {
+                      setSearchorfilter(true)
+                      getsearchdata(searchtext)
                     }}
                   />
                 </View>
                : 
                null}
+
       <FlatList
         data={videolist}
         keyExtractor={(item) => item.id}
-        onEndReached={loadmore}
+        onEndReached={searchorfilter?null:loadmore}
+        onRefresh={() => {
+          setRefreshing(true);
+          getAPIdata();
+          setsearchsort("name")
+          setsearchsubject("chinese")
+          setsearchdate(null)
+          setsearchlength(null)
+          setNoresult(false)
+          setSearchorfilter(false)
+          setRefreshing(false);
+        }}
+        refreshing={refreshing}
         ListHeaderComponent={() => (
           <>
             <View style={styles.top}>
                 <>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Octicons name="chevron-left" size={40} color="#00A3A3" style={styles.backpage} />
-                </TouchableOpacity>  
-                  <MaterialCommunityIcons
-                    name="dots-vertical"
-                    size={30}
-                    style={{ marginRight: 5, opacity: 0 }}
-                  />
+                <Octicons name="chevron-left" size={30} style={{marginLeft:20,color:"#00A3A3"}}/>  
+                </TouchableOpacity>
+                <MaterialCommunityIcons
+                        name="dots-vertical"
+                        size={30}
+                        opacity = {0}
+                      />
 
                   <View style={styles.titleContainer}>
                     <Text style={styles.title}>影片庫</Text>
                   </View>
                   <View style={styles.iconsContainer}>
                     <TouchableOpacity
-                      onPress={() => setShowSearchBar(true)}
+                      onPress={() => {
+                        setShowSearchBar(true)
+                      }}
                       style={styles.searchIcon}
                     >
                       <Ionicons name="search" size={30} color="#00A3A3" />
@@ -129,20 +247,19 @@ function VideoRecords({ navigation }) {
                     </TouchableOpacity>
                   </View>
                 </>
-              
-            </View>
+            </View>        
+            
           </>
         )}
-
         renderItem={({ item }) => (
           <View style={styles.videoItem}>
             {/* Thumbnail */}
-            <TouchableOpacity onPress={() => {navigation.push("VideoStack",
-              {
-                screen: "PlayVideos",
-                params: { VIDEOID:item.id,VIDEODATA:item}
-              }
-              )}}>
+            <TouchableOpacity onPress={() => { 
+              navigation.push(
+                "VideoStack",{
+                screen:"PlayVideos",
+                params:{VIDEOID:item.id,VIDEODATA:item}
+              })}}>
               <View style={styles.thumbnail}>
                 <Image source={{ uri: item.thumbnail }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />
                 {item.is_new==true?
@@ -169,7 +286,8 @@ function VideoRecords({ navigation }) {
                   {/* Terms */}
                   <View style={styles.termsContainer}>
                     {item.hashtag.map((term, index) => (
-                      <TouchableOpacity key={index} style={styles.term}>
+                      <TouchableOpacity key={index} style={styles.term} onPress={()=>{
+                      }}>
                         <Text style={styles.termText}>{term}</Text>
                       </TouchableOpacity>
                     ))}
@@ -178,15 +296,21 @@ function VideoRecords({ navigation }) {
               </View>
             </View>
           </View>
+        
         )}
-
         ListFooterComponent={() => {
           return(
-            isloading?
+            <>
+            {isloading&&noresult==false?
             <View>
               <ActivityIndicator size="large"/>
             </View>
-            :null
+            :null}
+            
+            {noresult?
+            <Text style={{alignSelf:"center"}}>no result found</Text>
+            :null}
+            </>
           )
         }}
       />
@@ -204,29 +328,74 @@ function VideoRecords({ navigation }) {
               <View style={styles.modalItem}>
                 <Text>排序方式</Text>
                 <View style={styles.modalselect}>
-                  <Text>相關性</Text>
-                  <Ionicons name="chevron-down-sharp" size={25} color={"grey"} />
+                  <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchsort}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchsort(itemValue)
+                    }
+                  >
+                    <Picker.Item label="名稱" value="name"/>
+                    <Picker.Item label="日期" value="date"/>                    
+                  </Picker>
+
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>科目</Text>
                 <View style={styles.modalselect}>
-                  <Text>英文</Text>
-                  <Ionicons name="chevron-down-sharp" size={25} color={"grey"} />
+                <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchsubject}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchsubject(itemValue)
+                    }
+                  >
+                    <Picker.Item label="中文" value="chinese"/>
+                    <Picker.Item label="英文" value="english"/>
+                    <Picker.Item label="數學" value="math"/>
+                    <Picker.Item label="科學" value="science"/>
+                    <Picker.Item label="共通能力" value="other"/>
+                  </Picker>
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>上載日期</Text>
                 <View style={styles.modalselect}>
-                  <Text>不限時間</Text>
-                  <Ionicons name="chevron-down-sharp" size={25} color={"grey"} />
+                <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchdate}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchdate(itemValue)
+                    }
+                  >
+                    <Picker.Item label="不限時期" value={null}/>
+                    <Picker.Item label="最近一週" value="oneweek"/>
+                    <Picker.Item label="最近一個月" value="onemonth"/>
+                    <Picker.Item label="最近三個月" value="threemonth"/>
+
+                  </Picker>
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>片長</Text>
                 <View style={styles.modalselect}>
-                  <Text>不限</Text>
-                  <Ionicons name="chevron-down-sharp" size={25} color={"grey"} />
+                <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchlength}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchlength(itemValue)
+                    }
+                  >
+                    <Picker.Item label="不限" value={null}/>
+                    <Picker.Item label="1至5分鐘" value="onetofive"/>
+                    <Picker.Item label="5至10分鐘" value="fivetoten"/>
+                    <Picker.Item label="10分鐘以上" value="tenabove"/>
+                  </Picker>
                 </View>
               </View>
             </View>
@@ -239,7 +408,11 @@ function VideoRecords({ navigation }) {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButtonYes}
-                onPress={() => setsearchfilterVisible(false)}
+                onPress={() => {
+                  setsearchfilterVisible(false)
+                  setSearchorfilter(true)
+                  getsearchfilterdata(searchsort,searchsubject,searchdate,searchlength)
+                }}
               >
                 <Text style={styles.modalButtonText}>確定</Text>
               </TouchableOpacity>
@@ -247,6 +420,7 @@ function VideoRecords({ navigation }) {
           </View>
         </View>
       </Modal>
+
       <BottomNavBar />
     </SafeAreaView>
   );
@@ -271,7 +445,6 @@ const styles = StyleSheet.create({
   titleContainer: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   title: {
     fontSize: 20,
@@ -343,6 +516,59 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "white",
   },
+  hashtagtitle: {
+    fontSize:16,
+    fontWeight:"bold",
+    marginLeft:25,
+    color: "#00A3A3"
+  },
+  hashtagcontainer: {
+    flexDirection:"row",
+    backgroundColor: "#a7cfcf",
+    justifyContent:"center",
+    alignItems:"center",
+    marginTop:5,
+    marginLeft:10,
+    borderRadius: 10,
+    padding:5,
+  },
+  hashtagmodalbackground:{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.1)",
+  },
+  hashtagmodalbox:{
+    width: 250,
+    height: 200,
+    backgroundColor: "#E7FFFD",
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  hashtagmodalboxinnerbackground:{
+    width: 220,
+    height: 170,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
+  },
+  hashtagmodalinput:{
+    marginTop: 20,
+    justifyContent: "center",
+  },
+  hashtagmodalbuttons:{
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "80%",
+    marginTop: 20,
+  },
+  hashtagmodalinputcontent:{
+    marginTop: 5,
+    width:200,
+    flexDirection: "row",
+    alignItems: "center",
+  },
   videoItem: {
     flexDirection: "column",
     alignItems: "center",
@@ -350,7 +576,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     marginHorizontal: 20,
     padding: 10,
-    
+
   },
   thumbnail: {
     width: 350,
@@ -463,6 +689,11 @@ const styles = StyleSheet.create({
   modalButtonText: {
     color: "white",
     fontSize: 16,
+  },
+  picker: {
+    marginLeft: -40,
+    width: 150,
+    marginTop: -15,
   },
 });
 
