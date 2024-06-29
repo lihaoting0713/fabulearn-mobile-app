@@ -1,13 +1,15 @@
 // VideoPlayer.js
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ScrollView } from 'react-native';
+import React, { useState, useRef  } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ScrollView,  ActivityIndicator} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {Ionicons, Octicons, MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
+import { Video } from 'expo-av';
 
 const VideoPlayer = () => {
   const navigation = useNavigation();
   const route = useRoute();
+  const videoRef = useRef(null);
   const { video } = route.params;
 
   // Sample exercise data
@@ -31,9 +33,31 @@ const VideoPlayer = () => {
 
     const [currentQuestion, setCurrentQuestion] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
+    const [selectedVideo, setSelectedVideo] = useState(null);
+    const [isBuffering, setIsBuffering] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [answers, setAnswers] = useState(Array(exerciseData.length).fill(null));
     const [submissions, setSubmissions] = useState(Array(exerciseData.length).fill(false));
+
+    const handlePlaybackStatusUpdate = status => {
+      if (status.isLoaded) {
+        if (status.isBuffering !== isBuffering) {
+          setIsBuffering(status.isBuffering);
+        }
+  
+        if (status.didJustFinish) {
+          setSelectedVideo(null);
+        }
+      } else {
+        if (status.error) {
+          console.error(`Error: ${status.error}`);
+        }
+      }
+    };
+  
+    const closeVideoPlayer = () => {
+      setSelectedVideo(null);
+    };
 
     const handleOptionPress = (option) => {
       if (!submitted) {
@@ -86,24 +110,54 @@ const VideoPlayer = () => {
                     <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={30}/>  
                 </TouchableOpacity>
                 <View style={styles.logoContainer}>
-                <Image source={{ uri: video.logo }} style={styles.logo} />
-                <Text style={styles.logoTitle}>{video.logotitle}</Text>
+                  <Image source={{ uri: video.logo }} style={styles.logo} />
+                  <Text style={styles.logoTitle}>{video.logotitle}</Text>
                 </View>
-                <View>
-                <Text style={styles.videoTitle}>{video.title}</Text>
-                <View style={styles.termsContainer}>
-                    {video.term.map((term, index) => (
-                    <TouchableOpacity key={index} style={styles.term}>
-                        <Text style={styles.termText}>{term}</Text>
-                    </TouchableOpacity>
-                    ))}
-                </View>
+                <View style={styles.videoDetails}>
+                  <Text style={styles.videoTitle}>{video.title}</Text>
+                  <View style={styles.termsContainer}>
+                      {video.hashtag.map((term, index) => (
+                          <TouchableOpacity key={index} style={styles.term}>
+                              <Text style={styles.termText}>{term}</Text>
+                          </TouchableOpacity>
+                      ))}
+                  </View>
                 </View>
             </View>
             </View>
 
             {/* Video Placeholder */}
-            <View style={styles.thumbnail} />
+            <TouchableOpacity style={styles.thumbnail} onPress={() => setSelectedVideo(video.video_path)}>
+              
+              {selectedVideo === video.video_path ? (
+              <View style={styles.videoPlayerContainer}>
+                <Video
+                  ref={videoRef}
+                  source={{ uri: selectedVideo }}
+                  style={styles.videoPlayer}
+                  useNativeControls
+                  resizeMode="contain"
+                  onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+                  onEnd={() => setSelectedVideo(null)}
+                />
+                {isBuffering && (
+                  <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                  </View>
+                )}
+                <TouchableOpacity style={styles.closeButton} onPress={closeVideoPlayer}>
+                  <Text style={styles.closeButtonText}>X</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <>
+                <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                <View style={styles.playButtonContainer}>
+                  <Image source={require('../pictures/Play Button.png')} style={styles.playButton} />
+                </View>
+              </>
+            )}
+            </TouchableOpacity>
 
             <View style={styles.buttonRow}>
             <TouchableOpacity style={styles.button}>
@@ -202,6 +256,21 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 16,
   },
+  thumbnailImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 8,
+  },
+  playButtonContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -25 }, { translateY: -25 }],
+  },
+  playButton: {
+    width: 50,
+    height: 50,
+  },
   videotext: {
     width: '100%',
     marginBottom: 20,
@@ -228,22 +297,61 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: 'bold',
     marginTop: 5,
+    
   },
+
+  videoDetails: {
+    width: '80%'
+  },
+  
   videoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
     marginLeft: 10,
+    
   },
   termsContainer: {
     flexDirection: 'row',
     marginTop: 10,
+    flexWrap: 'wrap',
+    maxWidth: '90%', 
+    
   },
   term: {
     paddingHorizontal: 10,
+    flexShrink: 1,
   },
   termText: {
     color: '#00A3A3',
+  },
+  videoPlayerContainer: {
+    width: '100%',
+    aspectRatio: 16 / 9,
+  },
+  videoPlayer: {
+    width: '100%',
+    height: '100%',
+  },
+  loadingContainer: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 15,
+    padding: 10,
+    zIndex: 1,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonRow: {
     flexDirection: 'row',

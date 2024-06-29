@@ -42,7 +42,19 @@ const BottomNavBar = () => {
                 <TouchableOpacity 
                     style={[
                         styles.navButtonLarge, 
-                        (currentRoute === 'ChallengeScreen' || currentRoute === 'StartChallenge3') ? styles.activeButton : null
+                        (   currentRoute === 'ChallengeScreen'
+                            || currentRoute === 'StartChallenge0' 
+                            || currentRoute === 'StartChallenge3'
+                            || currentRoute === 'AcceptChallenge'
+                            || currentRoute === 'AcceptChallengeDetails'
+                            || currentRoute === 'ContinuingChallenge'
+                            || currentRoute === 'ContinuingChallengeDetails'
+                            || currentRoute === 'FinishedChallenge'
+                            || currentRoute === 'FinishedChallengeDetails'
+                            || currentRoute === 'StartedChallenge'
+                            || currentRoute === 'StartedChallengeDetails'
+                            || currentRoute === 'StartedChallengeSummary'
+                        ) ? styles.activeButton : null
                     ]}
                     onPress={() => 
                         handleNavigation('ChallengeStack')

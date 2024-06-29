@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { CommonActions } from '@react-navigation/native';
 import BottomNavBar from '../components/BottomNavBar';
 
 const { width } = Dimensions.get('window');
@@ -57,7 +58,15 @@ const StartChallenge3 = () => {
             ))}
         </View>
         <Text style={styles.finishUsers}>及其它26人</Text>
-        <TouchableOpacity style={styles.confirmButton} onPress={()=>navigation.navigate('ChallengeScreen')}>
+        <TouchableOpacity 
+          style={styles.confirmButton} 
+          onPress={() => navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [{ name: 'ChallengeScreen' }],
+            })
+          )}
+        >
             <Text style={styles.confirmButtonText}>確認</Text>
         </TouchableOpacity>
       </View>

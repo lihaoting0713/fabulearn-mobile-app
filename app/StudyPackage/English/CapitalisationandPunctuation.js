@@ -10,21 +10,24 @@ import {
     TextInput,
     Modal,
   } from "react-native";
-  import React, { useState } from "react";
+  import React, { useState, useEffect } from "react";
   import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
-  import BottomNavBar from '../components/BottomNavBar';
+  import BottomNavBar from '../../components/BottomNavBar';
   import { useNavigation } from '@react-navigation/native';
-  import VideoList from './VideoLists';
+  import axios from 'axios'; 
+  import { Video } from 'expo-av';
 
 
-  function LanguageAwareness() {
+  function CapitalisationandPunctuation() {
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
     const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
+    const [readingandWritingItems, setReadingandWritingItems] = useState([]);
+    const [CAPItems,setCAPItems] = useState([]);
     const navigation = useNavigation();
 
-    const handlePress = (sectionTitle) => {
-        navigation.navigate('VideoList', { sectionTitle });
+    const handlePress = (videoId) => {
+        navigation.navigate('VideoList', { videoId });
       };
 
       const cardsData = [
@@ -33,17 +36,47 @@ import {
           watchedVideos: '0/3',
           completedExercises: '3/9',
           grade: 'P1 - F3',
-          icon: require('../pictures/Account Icon.png')
+          icon: require('../../pictures/Account Icon.png')
         },
         {
             title: 'Punctuation (2)',
             watchedVideos: '0/3',
             completedExercises: '3/9',
             grade: 'P1 - F3',
-            icon: require('../pictures/Account Icon.png')
+            icon: require('../../pictures/Account Icon.png')
         },
         
       ];
+
+      const FetchCAPItems = async (videoId) => {
+        try {
+          const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
+          console.log('Making request to:', url);
+          const response = await axios.get(url);
+          const data = response.data;
+    
+
+          if (data.success) {
+
+            const items = Object.values(data.data).filter(item => item.topic === "Capitalisation and punctuation");
+            setCAPItems(items);
+           
+          } else {
+            console.error('Failed to fetch video data:', data);
+          }
+        } catch (error) {
+          console.error('Error fetching video data:', error.message);
+          if (error.response) {
+            console.error('Error response data:', error.response.data);
+          }
+        }
+      };
+    
+      useEffect(() => {
+        FetchCAPItems();
+      }, []);
+    
+
 
     return(
         <SafeAreaView style={styles.lAContainer}>
@@ -73,7 +106,7 @@ import {
                         />
                     </View>
                 )}
-                {cardsData.map((card, index) => (
+                {CAPItems.map((card, index) => (
                 <View key={index} style={styles.lACardsContainer}>
                     <View style={styles.IACardHeader}>
                     <Image
@@ -82,19 +115,19 @@ import {
                     />
                     <Text style={styles.IACardText}>{card.title}</Text>
                     </View>
-                    <TouchableOpacity style={styles.IAVideoCard} onPress={() => handlePress(card.title)}>
+                    <TouchableOpacity style={styles.IAVideoCard} onPress={() => handlePress(card.video_id)}>
                     <View style={styles.IAPlaceholder}>
-                        <Text style={styles.IAPlaceholderText}>Video Placeholder</Text>
+                        <Image source={{ uri: card.thumbnail }} style={styles.thumbnailImage} />
                     </View>
                     </TouchableOpacity>
                     <View style={styles.IACardDetailsConTainer}>
                     <View style={styles.IACardDetails}>
                         <Text style={styles.IACardDetailsText}>已觀看影片</Text>
-                        <Text style={styles.IACardDetailsStats}>{card.watchedVideos}</Text>
+                        <Text style={styles.IACardDetailsStats}>{card.number_of_watched_videos}/{card.total_number_of_videos}</Text>
                     </View>
                     <View style={styles.IACardDetails}>
                         <Text style={styles.IACardDetailsText}>已完成練習</Text>
-                        <Text style={styles.IACardDetailsStats}>{card.completedExercises}</Text>
+                        <Text style={styles.IACardDetailsStats}>{card.total_number_of_videos}/{card.total_number_of_exercises}</Text>
                     </View>
                     <View style={styles.IACardDetails}>
                         <Text style={styles.IACardDetailsText}>年級</Text>
@@ -289,6 +322,11 @@ import {
         justifyContent: 'center',
         alignItems: 'center',
     },
+    thumbnailImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 8,
+      },
     IAPlaceholderText: { 
         color: '#000',
         fontSize: 16,
@@ -375,4 +413,4 @@ import {
   
   });
 
-  export default LanguageAwareness
+  export default CapitalisationandPunctuation;
