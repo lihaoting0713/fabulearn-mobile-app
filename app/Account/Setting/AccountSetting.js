@@ -7,7 +7,12 @@ import { useNavigation } from '@react-navigation/native';
 function AccountSetting() {
     let usericon = "../../pictures/test-user-icon.34017c5c.png";
     const [userName, setUserName] = useState('');
+    const [firstname, setFirstname] = useState('');
+    const [lastname, setLastname] = useState('');
     const [email, setEmail] = useState('');
+    const [schoolfaculty, setSchoolFaculty] = useState('');
+    const [phone, setPhone] = useState('');
+    const [summary, setSummary] = useState('');
     const navigation = useNavigation();
 
     return (

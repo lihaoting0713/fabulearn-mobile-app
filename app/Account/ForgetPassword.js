@@ -13,18 +13,40 @@ import React, { useState } from "react";
 import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
-function CreateAccount() {
-  const [Username, setUsername] = useState("");
+function ForgetPassword() {
   const [mail, setmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordconfirm, setPasswordconfirm] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
 
   const navigation = useNavigation();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+  const requestrecovery = async (email) => {
+    try {
+      const url = "https://schools.fabulearn.net/api/recovery/request";
+      const formData = new FormData();
+      formData.append("platform", "bliss");
+      formData.append("email", email);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formData,
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.success) {
+        alert("請檢查您的電子郵件以取回密碼");
+      } else {
+        alert("請檢查您的電子郵件是否正確");
+      }
+    }
+    catch (error) {
+      alert('請求密碼時發生錯誤');
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -37,19 +59,8 @@ function CreateAccount() {
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Ionicons name="chevron-back" size={40} color="#00A3A3" />
             </TouchableOpacity>
-            <Text style={styles.title}>創建帳號</Text>
+            <Text style={styles.title}>取回密碼</Text>
             <View style={{ width: 40 }} />
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>用戶名稱</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.input}
-                value={Username}
-                onChangeText={setUsername}
-              />
-            </View>
           </View>
 
           <View style={styles.inputContainer}>
@@ -63,55 +74,19 @@ function CreateAccount() {
             </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>密碼</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                onPress={togglePasswordVisibility}
-                style={styles.eyeIcon}
-              >
-                <Feather
-                  name={showPassword ? "eye" : "eye-off"}
-                  size={24}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>確認密碼</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.input}
-                value={passwordconfirm}
-                onChangeText={setPasswordconfirm}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                onPress={togglePasswordVisibility}
-                style={styles.eyeIcon}
-              >
-                <Feather
-                  name={showPassword ? "eye" : "eye-off"}
-                  size={24}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
 
           <View style={styles.buttonscontainer}>
-            <TouchableOpacity style={styles.resetButton}>
-              <Text style={styles.resetButtonText}>重置</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton}>
+            <TouchableOpacity style={styles.confirmButton} onPress={()=>{
+                if(mail == ""){
+                  alert("請輸入電子郵件");
+                }
+                else if(mail.indexOf("@") == -1 || mail.indexOf(".") == -1){
+                  alert("請輸入有效的電子郵件");
+                }
+                else{
+                requestrecovery(mail)
+                }
+              }}>
               <Text style={styles.confirmButtonText}>確定</Text>
             </TouchableOpacity>
           </View>
@@ -216,4 +191,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default CreateAccount;
+export default ForgetPassword;

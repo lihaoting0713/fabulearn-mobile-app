@@ -7,11 +7,41 @@ import { useNavigation } from '@react-navigation/native';
 function Password() {
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [newpassword, setNewPassword] = useState('');
+    const [confirmpassword, setConfirmPassword] = useState('');
     const navigation = useNavigation();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
+
+    const changePassword = async (password,newpassword,confirmpassword) => {
+        try{
+            console.log(password,newpassword,confirmpassword)
+            const url = 'https://schools.fabulearn.net/api/profile/password';
+            const formData = new FormData();
+            formData.append('password_old', password);
+            formData.append('password_new', newpassword);
+            formData.append('password_confirm', confirmpassword);
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                body: formData,
+            });
+            const data = await response.json();
+            console.log(data)
+            if (data.success) {
+                alert('密碼更改成功');
+            } else {
+                alert('密碼更改失敗，請檢查密碼是否正確');
+            }
+        }
+        catch (error) {
+            alert('更改密碼時發生錯誤s');
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -26,7 +56,7 @@ function Password() {
                     </View>
 
                     <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Password</Text>
+                        <Text style={styles.label}>現有密碼</Text>
                         <View style={styles.passwordInputContainer}>
                             <TextInput
                                 style={styles.input}
@@ -40,7 +70,47 @@ function Password() {
                         </View>
                     </View>
 
-                    <TouchableOpacity style={styles.changeButton}>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>新密碼</Text>
+                        <View style={styles.passwordInputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                value={newpassword}
+                                onChangeText={setNewPassword}
+                                secureTextEntry={!showPassword}
+                            />
+                            <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                                <Feather name={showPassword ? 'eye-off' : 'eye'} size={24} color="gray" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>確認密碼</Text>
+                        <View style={styles.passwordInputContainer}>
+                            <TextInput
+                                style={styles.input}
+                                value={confirmpassword}
+                                onChangeText={setConfirmPassword}
+                                secureTextEntry={!showPassword}
+                            />
+                            <TouchableOpacity onPress={togglePasswordVisibility} style={styles.eyeIcon}>
+                                <Feather name={showPassword ? 'eye-off' : 'eye'} size={24} color="gray" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <TouchableOpacity style={styles.changeButton} onPress={
+                        () => {
+                            if (password === '' || newpassword === '' || confirmpassword === '') {
+                                alert('請輸入完整資料');
+                            } else if (newpassword !== confirmpassword) {
+                                alert('新密碼與確認密碼不相符');
+                            } else {
+                                changePassword(password,newpassword,confirmpassword);
+                            }
+                        }
+                    }>
                         <Text style={styles.changeButtonText}>更改</Text>
                     </TouchableOpacity>
 

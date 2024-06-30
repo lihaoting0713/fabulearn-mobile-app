@@ -12,6 +12,7 @@ import Logout from './Account/Logout';
 import AccountSetting from './Account/Setting/AccountSetting';
 import Password from './Account/Setting/Password';
 import CreateAccount from './Account/CreateAccount';
+import ForgetPassword from './Account/ForgetPassword';
 
 const MainStack = createNativeStackNavigator();
 const SettingStack = createNativeStackNavigator();
@@ -55,9 +56,10 @@ function NoteRecordsNavigator() {
 
 function LogoutNavigator() {
     return (
-        <SettingStack.Navigator screenOptions={{headerShown:false}}>
+        <SettingStack.Navigator screenOptions={{headerShown:false, headerLeft: ()=> null}}>
             <SettingStack.Screen name="Logout" component={Logout} />
             <SettingStack.Screen name="CreateAccount" component={CreateAccount} />
+            <SettingStack.Screen name="ForgetPassword" component={ForgetPassword} />
         </SettingStack.Navigator>
     );
 }

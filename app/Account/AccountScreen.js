@@ -1,12 +1,74 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, SafeAreaView, FlatList, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, SafeAreaView, FlatList, ScrollView, Image, TouchableOpacity,ActivityIndicator} from 'react-native';
 import { Ionicons, Octicons, SimpleLineIcons, Feather, AntDesign } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import BottomNavBar from '../components/BottomNavBar';
+import * as SecureStore from 'expo-secure-store';
 
 function AccountScreen({navigation}) {
-  let username = "陳小明";
+
   let usericon = "../pictures/test-user-icon.34017c5c.png";
+
+  const logout = async () => {
+    try {
+      const url = `https://schools.fabulearn.net/api/logout`;
+      const response = await fetch(url
+      );
+      const data = await response.json();
+      console.log("logout: ",data);
+      await SecureStore.setItemAsync("isLogin", "false");
+      await SecureStore.deleteItemAsync("Logined");
+      console.log("isLogin status: ",await SecureStore.getItemAsync("isLogin"));
+      console.log("Logined status: ",await SecureStore.getItemAsync("Logined"));
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+  
+  const [profile, setProfile] = useState({}); 
+
+  const getprofile = async () => {
+    try {
+      const url = `https://schools.fabulearn.net/api/profile`;
+      const response = await fetch(url
+      );
+      const data = await response.json();
+      console.log("profile: ",data);
+      await setProfile(data.data);
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  const [profileicon, setProfileicon] = useState({}); 
+
+  const [isloading, setIsloading] = useState(true);
+
+  const getprofileicon = async () => {
+    try {
+      const url = `https://schools.fabulearn.net/api/profile/icon`;
+      const response = await fetch(url
+      );
+      const data = await response.json();
+      console.log("profileicon: ",data);
+      setProfileicon(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getAPIdata = async () => {
+    setIsloading(true);
+    await getprofile();
+    await getprofileicon();
+    await setIsloading(false);
+  }
+
+  useEffect(()=>{
+    getAPIdata();
+  } , []);
+
+
   const [accountlist, setAccountlist] = useState([
     { text: '設定', id: "setting", icon: 'settings-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('SettingNavigator')},
     { text: '影片記錄', id: "video_records", icon: 'history', icontype: Octicons, size: 30 , onPress: () => navigation.navigate('VideoRecordsNavigator')},
@@ -14,16 +76,27 @@ function AccountScreen({navigation}) {
     { text: '筆記記錄', id: "note_records", icon: 'note', icontype: SimpleLineIcons, size: 30 , onPress: () => navigation.navigate('NoteRecordsNavigator')},
     { text: '獎章', id: "awards", icon: 'award', icontype: Feather, size: 30 , onPress: () => navigation.navigate('Awards')},
     { text: '關於APP', id: "aboutapp", icon: 'apps', icontype: Octicons, size: 30 , onPress: () => navigation.navigate('AboutApp')},
-    { text: '登出', id: "logout", icon: 'logout', icontype: AntDesign, size: 30 ,onPress: () => navigation.navigate('LogoutNavigator')},
+    { text: '登出', id: "logout", icon: 'logout', icontype: AntDesign, size: 30 ,onPress: async () => {
+      await logout();
+      await navigation.navigate('LogoutNavigator');
+    }},
   ]);
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.contentContainer}>
+        {isloading?
+        <ActivityIndicator size="large" color="#00A3A3" />
+        :
         <View style={styles.content}>
           <Text style={styles.title}>帳號</Text>
-          <Image source={require(usericon)} style={styles.usericon} />
-          <Text style={styles.username}>{username}</Text>
+          {
+            profileicon.icon ?
+            <Image source={{uri: profileicon.icon}} style={styles.usericon} />
+            :
+            <Image source={require(usericon)} style={styles.usericon} />
+          }
+          <Text style={styles.username}>{profile? profile.first_name:null} {profile? profile.last_name:null}</Text>
 
           <FlatList
             style={styles.list}
@@ -40,6 +113,7 @@ function AccountScreen({navigation}) {
             )}
           />
         </View>
+        } 
       </ScrollView>
       <BottomNavBar navigation={navigation} />
     </SafeAreaView>
