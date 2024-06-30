@@ -17,58 +17,60 @@ import { useNavigation } from '@react-navigation/native';
 import BottomNavBar from '../../components/BottomNavBar'; // Import the BottomNavBar component
 import StudyPackageNavBar from '../StudyPackageNavBar';
 import axios from 'axios';
+import { SvgUri } from "react-native-svg";
 
 
-function StudyPackageE() {
+function StudyPackageS() {
   const navigation = useNavigation();
 
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const [englishTopics, setEnglishTopics] = useState([]);
+  const [scienceTopics, setScienceTopics] = useState([]);
   const [totals, setTotals] = useState({
     watchedVideos: 0,
     totalVideos: 0,
     completedExercises: 0,
     totalExercises: 0,
-});
+  });
 
-  const fetchEnglishTopics = async () => {
+  const fetchScienceTopics = async () => {
     try {
-        const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
-        console.log('Making request to:', url);
-        const response = await axios.get(url);
-        const data = response.data;
+      const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
+      console.log('Making request to:', url);
+      const response = await axios.get(url);
+      const data = response.data;
 
-        if (data.success) {
-          const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "english");
-          const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
-          setEnglishTopics(uniqueTopics);
+      if (data.success) {
+        const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "science");
+        const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
+        setScienceTopics(uniqueTopics);
 
-            // Calculate totals
-            const totals = items.reduce(
-                (acc, item) => {
-                    acc.watchedVideos += item.number_of_watched_videos;
-                    acc.totalVideos += item.total_number_of_videos;
-                    acc.completedExercises += item.number_of_completed_exercises;
-                    acc.totalExercises += item.total_number_of_exercises;
-                    return acc;
-                },
-                { watchedVideos: 0, totalVideos: 0, completedExercises: 0, totalExercises: 0 }
-            );
-            setTotals(totals);
-        } else {
-            console.error('Failed to fetch video data:', data);
-        }
+        const totals = items.reduce(
+          (acc, item) => {
+              acc.watchedVideos += item.number_of_watched_videos;
+              acc.totalVideos += item.total_number_of_videos;
+              acc.completedExercises += item.number_of_completed_exercises;
+              acc.totalExercises += item.total_number_of_exercises;
+              return acc;
+          },
+          { watchedVideos: 0, totalVideos: 0, completedExercises: 0, totalExercises: 0 }
+        );
+        setTotals(totals);
+
+
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
     } catch (error) {
-        console.error('Error fetching video data:', error.message);
-        if (error.response) {
-            console.error('Error response data:', error.response.data);
-        }
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
     }
-};
+  };
 
-useEffect(() => {
-    fetchEnglishTopics();
-}, []);
+  useEffect(() => {
+    fetchScienceTopics();
+  }, []);
  
 
  
@@ -123,13 +125,11 @@ useEffect(() => {
                 <Text style={styles.statValue}>{totals.completedExercises}/{totals.totalExercises}</Text>
             </View>
             <Text style={styles.detailLink}>詳情</Text>
-        </View>
-
-      
+        </View> 
         
         <View>
 
-        {englishTopics.map((item) => (
+        {scienceTopics.map((item) => (
           <TouchableOpacity 
             key={item.id} 
             style={styles.workContainer} 
@@ -146,7 +146,7 @@ useEffect(() => {
             </View>
           </TouchableOpacity>
         ))}
-          
+
 
         </View>
       </ScrollView>
@@ -393,19 +393,19 @@ detailLink: {
     color: '#ffffff',
 },
 workContainer:{
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  backgroundColor: '#fffcec',
-  padding: 20,
-  borderRadius: 10,
-  
-  margin: 15,
-},
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fffcec',
+    padding: 20,
+    borderRadius: 10,
+    
+    margin: 15,
+  },
 
-workItem: {
-  flexDirection:'row',
-  alignItems: 'center',
+  workItem: {
+    flexDirection:'row',
+    alignItems: 'center',
 },
 workIcon: {
     width: 40,
@@ -425,7 +425,7 @@ workContainerLast:{
   backgroundColor: '#fffcec',
   padding: 20,
   borderRadius: 10,
-  height: '22%',
+  height: '11.5%',
   margin: 15,
   marginBottom:200,
  
@@ -433,4 +433,4 @@ workContainerLast:{
 
 });
 
-export default StudyPackageE;
+export default StudyPackageS;

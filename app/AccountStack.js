@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
+
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AccountScreen from './Account/AccountScreen';
 import Setting from './Account/Setting/Setting';

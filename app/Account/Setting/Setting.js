@@ -3,7 +3,6 @@ import { StyleSheet, Text, View, SafeAreaView, FlatList, TouchableOpacity, Switc
 import { Ionicons, Octicons, SimpleLineIcons, Feather, AntDesign } from '@expo/vector-icons';
 import React, { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 function Setting({ }) {

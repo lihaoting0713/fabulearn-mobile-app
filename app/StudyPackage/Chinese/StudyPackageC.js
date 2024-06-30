@@ -19,11 +19,11 @@ import StudyPackageNavBar from '../StudyPackageNavBar';
 import axios from 'axios';
 
 
-function StudyPackageE() {
+function StudyPackageC() {
   const navigation = useNavigation();
 
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const [englishTopics, setEnglishTopics] = useState([]);
+  const [chineseTopics, setChineseTopics] = useState([]);
   const [totals, setTotals] = useState({
     watchedVideos: 0,
     totalVideos: 0,
@@ -31,7 +31,7 @@ function StudyPackageE() {
     totalExercises: 0,
 });
 
-  const fetchEnglishTopics = async () => {
+  const fetchChineseTopics = async () => {
     try {
         const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
         console.log('Making request to:', url);
@@ -39,9 +39,9 @@ function StudyPackageE() {
         const data = response.data;
 
         if (data.success) {
-          const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "english");
+          const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "chinese");
           const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
-          setEnglishTopics(uniqueTopics);
+          setChineseTopics(uniqueTopics);
 
             // Calculate totals
             const totals = items.reduce(
@@ -67,7 +67,7 @@ function StudyPackageE() {
 };
 
 useEffect(() => {
-    fetchEnglishTopics();
+    fetchChineseTopics();
 }, []);
  
 
@@ -76,7 +76,7 @@ useEffect(() => {
 
   return (
     <View style={styles.container}>
-    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+    <ScrollView style={styles.scrollViewContent}>
       <View style={styles.top}>
         {showSearchBar ? (
           <View style={styles.searchBarContainer}>
@@ -129,7 +129,7 @@ useEffect(() => {
         
         <View>
 
-        {englishTopics.map((item) => (
+        {chineseTopics.map((item) => (
           <TouchableOpacity 
             key={item.id} 
             style={styles.workContainer} 
@@ -161,7 +161,6 @@ const styles = StyleSheet.create({
   },
 
   scrollViewContent: {
-    paddingBottom: 140,
   },
   top: {
     flexDirection: "row",
@@ -433,4 +432,4 @@ workContainerLast:{
 
 });
 
-export default StudyPackageE;
+export default StudyPackageC;

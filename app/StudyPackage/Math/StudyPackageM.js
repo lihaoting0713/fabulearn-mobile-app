@@ -19,11 +19,11 @@ import StudyPackageNavBar from '../StudyPackageNavBar';
 import axios from 'axios';
 
 
-function StudyPackageE() {
+function StudyPackageM() {
   const navigation = useNavigation();
 
   const [showSearchBar, setShowSearchBar] = useState(false);
-  const [englishTopics, setEnglishTopics] = useState([]);
+  const [mathTopics, setMathTopics] = useState([]);
   const [totals, setTotals] = useState({
     watchedVideos: 0,
     totalVideos: 0,
@@ -31,7 +31,7 @@ function StudyPackageE() {
     totalExercises: 0,
 });
 
-  const fetchEnglishTopics = async () => {
+  const fetchMathTopics = async () => {
     try {
         const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
         console.log('Making request to:', url);
@@ -39,9 +39,9 @@ function StudyPackageE() {
         const data = response.data;
 
         if (data.success) {
-          const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "english");
+          const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "math");
           const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
-          setEnglishTopics(uniqueTopics);
+          setMathTopics(uniqueTopics);
 
             // Calculate totals
             const totals = items.reduce(
@@ -67,7 +67,7 @@ function StudyPackageE() {
 };
 
 useEffect(() => {
-    fetchEnglishTopics();
+    fetchMathTopics();
 }, []);
  
 
@@ -129,7 +129,7 @@ useEffect(() => {
         
         <View>
 
-        {englishTopics.map((item) => (
+        {mathTopics.map((item) => (
           <TouchableOpacity 
             key={item.id} 
             style={styles.workContainer} 
@@ -433,4 +433,4 @@ workContainerLast:{
 
 });
 
-export default StudyPackageE;
+export default StudyPackageM;

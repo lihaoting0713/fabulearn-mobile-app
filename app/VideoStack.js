@@ -1,5 +1,4 @@
 import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import VideoLibrary from './VideoLibrary/VideoLibrary';
 import Videos from './VideoLibrary/Videos';

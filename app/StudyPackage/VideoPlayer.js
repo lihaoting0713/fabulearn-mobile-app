@@ -1,16 +1,20 @@
 // VideoPlayer.js
-import React, { useState, useRef  } from 'react';
+import React, { useState, useRef, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ScrollView,  ActivityIndicator} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {Ionicons, Octicons, MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
+import { VideoContext} from '../VideoContext';
 import { Video } from 'expo-av';
+import { useDispatch } from 'react-redux';
+import { setVideoId } from '../videoSlice'; // Ensure correct import path
 
 const VideoPlayer = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const videoRef = useRef(null);
   const { video } = route.params;
+  const dispatch = useDispatch();
 
   // Sample exercise data
   const exerciseData = [
@@ -53,6 +57,21 @@ const VideoPlayer = () => {
           console.error(`Error: ${status.error}`);
         }
       }
+    };
+
+    useEffect(() => {
+      if (route.params?.videoId) {
+        console.log('Playing video with ID:', route.params.videoId); // Debug log
+        dispatch(setVideoId(route.params.videoId));
+        console.log('Dispatched videoId to Redux:', route.params.videoId); // Debug log
+      }
+    }, [route.params?.videoId]);
+
+    const handleVideoPlay = (videoPath, videoId) => {
+      console.log('Playing video with ID:', videoId); // Debug log
+      setSelectedVideo(videoPath);
+      dispatch(setVideoId(videoId));
+      console.log('Set videoId in Redux:', videoId); // Debug log
     };
   
     const closeVideoPlayer = () => {
@@ -127,7 +146,7 @@ const VideoPlayer = () => {
             </View>
 
             {/* Video Placeholder */}
-            <TouchableOpacity style={styles.thumbnail} onPress={() => setSelectedVideo(video.video_path)}>
+            <TouchableOpacity style={styles.thumbnail} onPress={() => handleVideoPlay(video.video_path, video.id)}>
               
               {selectedVideo === video.video_path ? (
               <View style={styles.videoPlayerContainer}>

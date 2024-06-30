@@ -16,13 +16,60 @@ import React, { useState, useEffect } from "react";
 import { useNavigation } from '@react-navigation/native';
 import BottomNavBar from '../../components/BottomNavBar'; // Import the BottomNavBar component
 import StudyPackageNavBar from '../StudyPackageNavBar';
+import axios from 'axios';
 import { SvgUri } from "react-native-svg";
 
 
-function StudyPackageC() {
+function StudyPackageO() {
   const navigation = useNavigation();
 
   const [showSearchBar, setShowSearchBar] = useState(false);
+  const [otherTopics, setOtherTopics] = useState([]);
+  const [totals, setTotals] = useState({
+    watchedVideos: 0,
+    totalVideos: 0,
+    completedExercises: 0,
+    totalExercises: 0,
+  });
+
+  const fetchOtherTopics = async () => {
+    try {
+      const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
+      console.log('Making request to:', url);
+      const response = await axios.get(url);
+      const data = response.data;
+
+      if (data.success) {
+        const items = Object.values(data.data).filter(item => item.subject.toLowerCase() === "other");
+        const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
+        setOtherTopics(uniqueTopics);
+
+        const totals = items.reduce(
+          (acc, item) => {
+              acc.watchedVideos += item.number_of_watched_videos;
+              acc.totalVideos += item.total_number_of_videos;
+              acc.completedExercises += item.number_of_completed_exercises;
+              acc.totalExercises += item.total_number_of_exercises;
+              return acc;
+          },
+          { watchedVideos: 0, totalVideos: 0, completedExercises: 0, totalExercises: 0 }
+        );
+        setTotals(totals);
+
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchOtherTopics();
+  }, []);
  
 
  
@@ -30,7 +77,7 @@ function StudyPackageC() {
 
   return (
     <View style={styles.container}>
-    <ScrollView style={styles.scrollViewContent}>
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
       <View style={styles.top}>
         {showSearchBar ? (
           <View style={styles.searchBarContainer}>
@@ -70,45 +117,35 @@ function StudyPackageC() {
         <View style={styles.progressContainer}>
             <View style={styles.statItem}>
                 <Text style={styles.statLabel}>已觀看影片</Text>
-                <Text style={styles.statValue}>10/250</Text>
+                <Text style={styles.statValue}>{totals.watchedVideos}/{totals.totalVideos}</Text>
             </View>
             <View style={styles.statItem}>
                 <Text style={styles.statLabel}>已完成練習</Text>
-                <Text style={styles.statValue}>60/300</Text>
+                <Text style={styles.statValue}>{totals.completedExercises}/{totals.totalExercises}</Text>
             </View>
             <Text style={styles.detailLink}>詳情</Text>
-        </View>
-
-      
+        </View> 
         
         <View>
 
-        <TouchableOpacity style={styles.workContainer} onPress={() => navigation.navigate('Writing')} >
-              <View style={styles.workItem}>
-                  <Image 
-                      style ={styles.workIcon}
-                      source={require('../../pictures/Account Icon.png')}
-                      />
-                  <Text style={styles.workLabel}>
-                      {`寫作`}
-                  </Text>
-              </View>  
+        {otherTopics.map((item) => (
+          <TouchableOpacity 
+            key={item.id} 
+            style={styles.workContainer} 
+            onPress={() => navigation.navigate('Topics', { topic: item.topic })}
+          >
+            <View style={styles.workItem}>
+              <Image 
+                style={styles.workIcon}
+                source={{ uri: item.thumbnail }}
+              />
+              <Text style={styles.workLabel}>
+                {item.topic}
+              </Text>
+            </View>
           </TouchableOpacity>
+        ))}
 
-
-
-          <TouchableOpacity style={styles.workContainerLast} onPress={() => navigation.navigate('Reading')}>
-              <View style={styles.workItem}>
-                  <Image 
-                      style ={styles.workIcon}
-                      source={require('../../pictures/Account Icon.png')}
-                      />
-                  <Text style={styles.workLabel}>
-                      {`閱讀`}
-                  </Text>
-              </View>  
-          </TouchableOpacity>
-          
 
         </View>
       </ScrollView>
@@ -123,6 +160,7 @@ const styles = StyleSheet.create({
   },
 
   scrollViewContent: {
+    paddingBottom: 140,
   },
   top: {
     flexDirection: "row",
@@ -360,7 +398,7 @@ workContainer:{
     backgroundColor: '#fffcec',
     padding: 20,
     borderRadius: 10,
-    height: '22%',
+    
     margin: 15,
   },
 
@@ -386,7 +424,7 @@ workContainerLast:{
   backgroundColor: '#fffcec',
   padding: 20,
   borderRadius: 10,
-  height: '22%',
+  height: '11.5%',
   margin: 15,
   marginBottom:200,
  
@@ -394,4 +432,4 @@ workContainerLast:{
 
 });
 
-export default StudyPackageC;
+export default StudyPackageO;

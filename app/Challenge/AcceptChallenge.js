@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
 import axios from 'axios'; 
+
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
@@ -48,43 +49,47 @@ const AcceptChallenge = () => {
         // Navigate to the VideoPlayer screen
         navigation.navigate('AcceptChallengeDetails', {message});
       };
-    
 
-      const fetchChallenges = async () => {
+      const axiosInstance = axios.create({
+        baseURL: 'https://schools.fabulearn.net/api/bliss/challenges',
+        timeout: 1000,
+        // For Android only (bypassing SSL validation)
+        ...(Platform.OS === 'android' && {
+          httpsAgent: new axios.create({
+            httpsAgent: new require('https').Agent({  
+              rejectUnauthorized: false
+            })
+          }),
+        }),
+        // Add custom adapter for Android
+        ...(Platform.OS === 'android' && {
+          adapter: require('axios/lib/adapters/http')
+        }),
+      });
+      
+      const fetchItems = async () => {
         try {
-          const url = 'http://192.168.18.12/api/bliss/challenges';
-          const params = {
-            approach: 'habit',
-          };
-    
-          console.log('Making request to:', url, 'with params:', params);
-          const response = await axios.get(url, { params });
-          console.log('Full Response:', response);
-    
+          const response = await axiosInstance.get();
           const data = response.data;
-          console.log('Response Data:', data);
-    
+          console.log(data);
+      
           if (data.success) {
-            const challenge = Object.values(data.data.results);
-            setChallengeDetails(challenge);
-            console.log('Challenge Details:', challenge);
+            const topicItems = Object.values(data.data);
+            setChallengeDetails(topicItems);
           } else {
-            console.error('Failed to fetch challenges:', data.error);
+            console.error('Failed to fetch video data:', data);
           }
         } catch (error) {
-          console.error('Error fetching challenges:', error.message);
+          console.error('Error fetching video data:', error.message);
           if (error.response) {
             console.error('Error response data:', error.response.data);
           }
         }
       };
-    
+      
       useEffect(() => {
-        fetchChallenges();
+        fetchItems();
       }, []);
-    
-
-
       console.log(ChallengeDetails)
 
     

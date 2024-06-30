@@ -1,13 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, SafeAreaView, Dimensions, ActivityIndicator} from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from './components/Header';
 import { Video } from 'expo-av';
 import BottomNavBar from './components/BottomNavBar'; 
 import axios from 'axios'; 
-import HomeVideo from './HomeVideo.js'
-
-
+import { useSelector, useDispatch } from 'react-redux';
 
 
 const HomeScreen = () => {
@@ -15,27 +13,24 @@ const HomeScreen = () => {
 
   const [activePage, setActivePage] = useState('系統挑戰'); 
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [watchRecommendVideos, setWatchRecommendVideos] = useState([]);
   const [watchHistoryVideos, setWatchHistoryVideos] = useState([]);
-  const [recommendedVideos1, setRecommendedVideos1] = useState([]);
-  const [recommendedVideos2, setRecommendedVideos2] = useState([]);
   const [learnvideolist, setLearnvideolist] = useState([]);
   const [isBuffering, setIsBuffering] = useState(false);
   const navigation = useNavigation();
-  const videoId = 485;
   const videoRef = useRef(null);
-
-
-
-
-  const fetchVideos = async (videoId) => {
+  const route = useRoute();
+  const videoId = useSelector((state) => state.video.videoId);
+  
+  const fetchRecVideos = useCallback(async (videoId) => {
     try {
-      const url = `https://schools.fabulearn.net/api/bliss/videos/485/recommendation`;
-      console.log('Making request to:', url);
+      const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/recommendation`;
+      console.log('Making request to:', url); // Debug log
       const response = await axios.get(url);
       const data = response.data;
-      
+
       if (data.success) {
- 
+        console.log('Fetched videos:', data.data.recommendation); // Debug log
         const videos = Object.values(data.data.recommendation);
         setWatchHistoryVideos(videos);
       } else {
@@ -47,11 +42,47 @@ const HomeScreen = () => {
         console.error('Error response data:', error.response.data);
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchVideos(videoId);
+    console.log('Current videoId from context in HomeScreen:', videoId); // Debug log
+    if (videoId) {
+      fetchRecVideos(videoId);
+    }
+  }, [videoId, fetchRecVideos]);
+
+
+
+  const fetchHistoryVideos = useCallback(async (videoId) => {
+    try {
+      const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/recommendation`;
+      console.log('Making request to:', url); // Debug log
+      const response = await axios.get(url);
+      const data = response.data;
+
+      if (data.success) {
+        console.log('Fetched videos:', data.data.recommendation); // Debug log
+        const videos = Object.values(data.data.recommendation);
+        setWatchRecommendVideos(videos);
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    console.log('Current videoId from context in HomeScreen:', videoId); // Debug log
+    if (videoId) {
+      fetchHistoryVideos(videoId);
+    }
+  }, [videoId, fetchHistoryVideos]);
+
+
 
 
 
@@ -149,7 +180,7 @@ const HomeScreen = () => {
               <Text style = {styles.watchHistoryText}>推薦影片</Text>
             </View>
             <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
-            {watchHistoryVideos.map((video, index) => (
+            {watchRecommendVideos.map((video, index) => (
               <View key={index} style={styles.videoContainer}>
                 <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
                     <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
@@ -177,7 +208,7 @@ const HomeScreen = () => {
             <Text style = {styles.watchHistoryText}>推薦影片</Text>
           </View>
           <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
-          {watchHistoryVideos.map((video, index) => (
+          {watchRecommendVideos.map((video, index) => (
             <View key={index} style={styles.videoContainer}>
               <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
                   <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
