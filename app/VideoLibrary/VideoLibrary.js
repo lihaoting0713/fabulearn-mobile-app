@@ -563,7 +563,7 @@ const deletehashtag = (hashtag) => {
                       setsearchdate(itemValue)
                     }
                   >
-                    <Picker.Item label="不限時期" value={null}/>
+                    <Picker.Item label="不限時期" value="none"/>
                     <Picker.Item label="最近一週" value="oneweek"/>
                     <Picker.Item label="最近一個月" value="onemonth"/>
                     <Picker.Item label="最近三個月" value="threemonth"/>
@@ -582,7 +582,7 @@ const deletehashtag = (hashtag) => {
                       setsearchlength(itemValue)
                     }
                   >
-                    <Picker.Item label="不限" value={null}/>
+                    <Picker.Item label="不限" value="none"/>
                     <Picker.Item label="1至5分鐘" value="onetofive"/>
                     <Picker.Item label="5至10分鐘" value="fivetoten"/>
                     <Picker.Item label="10分鐘以上" value="tenabove"/>

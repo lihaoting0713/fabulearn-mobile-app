@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Alert, Modal, Dimensions,  StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -15,128 +15,123 @@ console.log(width)
 
 const AcceptChallenge = () => {
     const navigation = useNavigation();
-
     const [showSearchBar, setShowSearchBar] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
-    const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [selectedOption, setSelectedOption] = useState('挑戰者');
-    const [ChallengeDetails, setChallengeDetails] = useState([]);
-   
+    const [challengeDetails, setChallengeDetails] = useState([]);
+    const [searchtext,setSearchtext] = useState("")
+    const [originalChallengesDetails,  setOriginalChallengesDetails] = useState([]);
 
+    const getsearchdata = async (challenges, searchtext) => {
+      let filteredChallenges = challenges;
+      console.log(`searchtext: ${searchtext}`);
+      if (searchtext) {
+        filteredChallenges = filteredChallenges.filter(item => item.title === searchtext);
+      }
+      return filteredChallenges;
+    };
 
-    useEffect(() => {
-        const keyboardWillShowListener = Keyboard.addListener(
-            'keyboardWillShow',
-            () => {
-                setKeyboardVisible(true);
-            }
-        );
-        const keyboardWillHideListener = Keyboard.addListener(
-            'keyboardWillHide',
-            () => {
-                setKeyboardVisible(false);
-            }
-        );
-
-        return () => {
-            keyboardWillHideListener.remove();
-            keyboardWillShowListener.remove();
-        };
+    const handleSearch = async () => {
+      const filteredChallenges = await getsearchdata(originalChallengesDetails, searchtext);
+      setChallengeDetails(filteredChallenges);
+    };
+  
+    const handleSearchTextChange = useCallback((text) => {
+      setSearchtext(text);
     }, []);
 
 
-    const handleDetailsPress = (message) => {
-        // Navigate to the VideoPlayer screen
-        navigation.navigate('AcceptChallengeDetails', {message});
+    const fetchItems = async () => {
+      const baseURL = 'http://192.168.18.12/api';
+  
+      let response;
+      try {
+        console.log('Attempting to log in...');
+        response = await axios.post(`${baseURL}/login`, {
+          login_id: 'student1@testing.com',
+          password: 'demo'
+        }, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+          withCredentials: true
+        });
+        console.log('Login response:', response);
+      } catch (error) {
+        console.error('Error logging in:', error.message);
+        console.error('Error details:', error);
+        return;
+      }
+  
+      let options = {};
+      let headers = {
+        'Content-Type': 'multipart/form-data'
+      };
+  
+      if ('set-cookie' in response.headers) {
+        let cookie = response.headers['set-cookie'][0].split(';')[0];
+        headers['Cookie'] = cookie;
+      } else {
+        options['withCredentials'] = true;
+      }
+      options['headers'] = headers;
+  
+      try {
+        const url = `${baseURL}/bliss/challenges`;
+        console.log('Making request to:', url);
+        const challengeResponse = await axios.get(url, options);
+        console.log('Challenges response:', challengeResponse);
+        const data = challengeResponse.data;
+  
+        if (data.success) {
+          const topicItems = data.data.results;
+          console.log('Fetched items:', topicItems);
+          setChallengeDetails(topicItems);
+          setOriginalChallengesDetails(topicItems);
+        } else {
+          console.error('Failed to fetch video data:', data);
+        }
+      } catch (error) {
+        console.error('Error fetching video data:', error.message);
+        if (error.response) {
+          console.error('Error response data:', error.response.data);
+        }
+      }
+    };
+  
+    useEffect(() => {
+      fetchItems();
+    }, []);
+  
+    useEffect(() => {
+      console.log('Updated Challenge details state:', challengeDetails);
+    }, [challengeDetails]);
+
+
+      const handleDetailsPress = (videoId) => {
+        navigation.navigate('AcceptChallengeDetails', {videoId});
       };
 
-      const axiosInstance = axios.create({
-        baseURL: 'https://schools.fabulearn.net/api/bliss/challenges',
-        timeout: 1000,
-        // For Android only (bypassing SSL validation)
-        ...(Platform.OS === 'android' && {
-          httpsAgent: new axios.create({
-            httpsAgent: new require('https').Agent({  
-              rejectUnauthorized: false
-            })
-          }),
-        }),
-        // Add custom adapter for Android
-        ...(Platform.OS === 'android' && {
-          adapter: require('axios/lib/adapters/http')
-        }),
-      });
-      
-      const fetchItems = async () => {
-        try {
-          const response = await axiosInstance.get();
-          const data = response.data;
-          console.log(data);
-      
-          if (data.success) {
-            const topicItems = Object.values(data.data);
-            setChallengeDetails(topicItems);
-          } else {
-            console.error('Failed to fetch video data:', data);
-          }
-        } catch (error) {
-          console.error('Error fetching video data:', error.message);
-          if (error.response) {
-            console.error('Error response data:', error.response.data);
-          }
-        }
-      };
-      
-      useEffect(() => {
-        fetchItems();
-      }, []);
-      console.log(ChallengeDetails)
 
-    
+    const renderHearts = (chance) => {
+      const hearts = [];
+      for (let i = 0; i < 3; i++) {
+        hearts.push(
+          <Image
+            key={i}
+            source={i < chance ? require('../pictures/Heart Full.png') : require('../pictures/Heart Empty.png')}
+            style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]}
+          />
+        );
+      }
+      return hearts;
+    };
       
-      const data = [
-        {
-          id: 2501,
-          name: '小明',
-          challenge: '挑戰：10日數學自習',
-          details: '限時：1日    10條H/日',
-          dateStart: '12 / 12 / 2023',
-          dateEnd: '12 / 12 / 2023',
-          progress: 70 
-        },
-        {
-          id: 2502,
-          name: '小明',
-          challenge: '挑戰：10日數學自習',
-          details: '限時：1日 10條H/日',
-          dateStart: '12 / 12 / 2023',
-          dateEnd: '12 / 12 / 2023',
-          progress: 50 
-        },
-        {
-          id: 2503,
-          name: '小明',
-          challenge: '挑戰：10日數學自習',
-          details: '限時：1日 10條H/日',
-          dateStart: '12 / 12 / 2023',
-          dateEnd: '12 / 12 / 2023',
-          progress: 30 
-        },
-        {
-          id: 2504,
-          name: '小明',
-          challenge: '挑戰：10日數學自習',
-          details: '限時：1日 10條H/日',
-          dateStart: '12 / 12 / 2023',
-          dateEnd: '12 / 12 / 2023',
-          progress: 90 
-        }
-      ];
-
-
+      
     return(
 
-        <SafeAreaView style={styles.aCPageContainer}>                    
+        <SafeAreaView style={styles.aCPageContainer}>    
+
             <ScrollView  contentContainerStyle={styles.aCScrollViewContent1} >
             <View style={styles.aCHeader}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -150,9 +145,8 @@ const AcceptChallenge = () => {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.aCSearchFilterContainer} onPress={() => setModalVisible(true)}>
-                    <MaterialCommunityIcons name="dots-vertical" size= {30} style={styles.aCFilterIcon}/>
+                    <MaterialCommunityIcons name="dots-vertical"    size= {30} style={styles.aCFilterIcon}/>
                 </TouchableOpacity>
-        
             </View>
             {showSearchBar && (
                 <View style={styles.aCSearchBarOverlay1}>
@@ -160,40 +154,45 @@ const AcceptChallenge = () => {
                     style={styles.aCSearchInput} 
                     placeholder="Search..."
                     placeholderTextColor="#aaa"
+                    value={searchtext}
+                    onChangeText={handleSearchTextChange}
+                    onSubmitEditing={handleSearch}
                     
                     />
                 </View>
             )}
-                {ChallengeDetails.map((item) => (
-                    <View key={item.id} style={styles.aCCard}>
+               {challengeDetails.length > 0 ? (
+                    challengeDetails.map((item) => (
+                      <View key={item.id} style={styles.aCCard}>
                         <View style={styles.aCCardHeader}>
-                            <View style={styles.aCCardTitle1}>
-                                <Text style={styles.aCTitle}>{`#${item.id}`}</Text>
-                                <Image source={require('../pictures/Account Icon Black.png')} style={styles.aCProfileImage}/>
-                            </View>      
-                            <View style={styles.aCCardTitle2}>      
-                            <Text style={[styles.aCSubtitle, isSmallScreen && styles.aCSubtitleSmall]}>{item.challenge}</Text>
-                            <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>{item.details}</Text>
-                            </View>
-                        </View>
+                          <View style={styles.aCCardTitle1}>
+                            <Text style={styles.aCTitle}>{`#${item.id}`}</Text>
+                            <Image source={require('../pictures/Account Icon Black.png')} style={styles.aCProfileImage} />
+                          </View>
+                          <View style={styles.aCCardTitle2}>
+                            <Text style={[styles.aCSubtitle, isSmallScreen && styles.aCSubtitleSmall]}>{item.title}</Text>
+                            <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>限時{item.total_day}日   {item.no_of_video_per_day} 條片 / 日</Text>
+                          </View>
+                        </View>           
                         <View style={styles.aCChancesContainer}>
-                            <Text style={[styles.aCChancesText, isSmallScreen && styles.aCChancesTextSmall]}>機會</Text>
-                            <View style={styles.aCHeartsContainer}>
-                                <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
-                                <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
-                                <Image source={require('../pictures/Heart Empty.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
-                            </View>
+                          <Text style={[styles.aCChancesText, isSmallScreen && styles.aCChancesTextSmall]}>機會</Text>
+                          <View style={styles.aCHeartsContainer}>
+                            {renderHearts(item.chance)}
+                          </View>
                         </View>
                         <View style={styles.aCCardActions}>
-                            <TouchableOpacity style={styles.aCRejectButton}>
+                          <TouchableOpacity style={styles.aCRejectButton}>
                             <Text style={styles.aCButtonText}>拒絕</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.aCDetailsButton} onPress={()=>handleDetailsPress(item)}>
+                          </TouchableOpacity>
+                          <TouchableOpacity style={styles.aCDetailsButton} onPress={() => handleDetailsPress(item.id)}>
                             <Text style={styles.aCButtonText}>詳情</Text>
-                            </TouchableOpacity>
+                          </TouchableOpacity>
                         </View>
-                    </View>
-                ))}
+                      </View>
+                    ))
+                  ) : (
+                    <Text style={styles.noDataText}>No challenges available</Text>
+                  )}
                     <Modal
                         animationType="slide"
                         transparent={true}
@@ -303,7 +302,7 @@ const styles = StyleSheet.create({
     
 
     aCCardTitle1: {
-        marginRight: 20,
+        marginRight: 10,
         flexDirection: 'column',  // Keep column to stack vertically
         alignItems: 'center',  // Center horizontally
         width: '18%',       
@@ -336,7 +335,7 @@ const styles = StyleSheet.create({
         padding: 5,
     },   
     aCSubtitleSmall: {
-        fontSize: 13,
+        fontSize: 12,
         color: '#555',
         padding: 5,
     },   
@@ -346,7 +345,7 @@ const styles = StyleSheet.create({
         padding: 5,
     },
     aCDetailsSmall: {
-        fontSize: 11,
+        fontSize: 12,
         color: '#777',
         padding: 5,
     },

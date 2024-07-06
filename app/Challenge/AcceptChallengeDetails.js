@@ -3,6 +3,7 @@ import { Alert, FlatList, Modal, Dimensions, StyleSheet, View, Text, TextInput, 
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons, Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
+import axios from 'axios'; 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 const { width } = Dimensions.get('window');
@@ -17,9 +18,14 @@ const AcceptChallenge = () => {
     const [isKeyboardVisible, setKeyboardVisible] = useState(false);
     const [selectedOption, setSelectedOption] = useState('挑戰者');
     const [backAlertVisible, setBackAlertVisible] = useState(false);
+    const [challengeDetails, setChallengeDetails] = useState([]);
+    const [item_start_datetime, setItem_start_datetime] = useState([]);
+    const [videolist, setVideolist] = useState([]);
+
 
     const route = useRoute();
-    const { message } = route.params;
+    const { videoId } = route.params;
+    console.log('videoId', videoId)
 
     useEffect(() => {
         const keyboardWillShowListener = Keyboard.addListener(
@@ -41,19 +47,83 @@ const AcceptChallenge = () => {
         };
     }, []);
 
-    const Card = ({ title, count, onPress }) => {
-        return (
-            <TouchableOpacity style={styles.cardContainer} onPress={onPress}>
-                <View style={styles.card}>
-                    <Text style={styles.cardTitle}>{title}</Text>
-                    <View style={styles.iconContainer}>
-                        <Text style={styles.cardCount}>{count}</Text>
-                    </View>
-                </View>
-                <View style={styles.cardRectangle} />
-            </TouchableOpacity>
-        );
-    };    
+
+
+
+    const fetchItems = async (videoId) => {
+        console.log('fetchItems function called with videoId:', videoId);
+        const baseURL = 'http://192.168.18.12/api';
+    
+        let response;
+        try {
+          console.log('Attempting to log in...');
+          response = await axios.post(`${baseURL}/login`, {
+            login_id: 'student1@testing.com',
+            password: 'demo'
+          }, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+            withCredentials: true
+          });
+          console.log('Login response:', response);
+        } catch (error) {
+          console.error('Error logging in:', error.message);
+          console.error('Error details:', error);
+          return;
+        }
+    
+        let options = {};
+        let headers = {
+          'Content-Type': 'multipart/form-data'
+        };
+    
+        if ('set-cookie' in response.headers) {
+          let cookie = response.headers['set-cookie'][0].split(';')[0];
+          headers['Cookie'] = cookie;
+        } else {
+          options['withCredentials'] = true;
+        }
+        options['headers'] = headers;
+    
+        try {
+          const url = `${baseURL}/bliss/challenges/${videoId}`;
+          console.log('Making request to:', url);
+          const challengeResponse = await axios.get(url, options);
+          console.log('Challenges response:', challengeResponse);
+          const data = challengeResponse.data;
+    
+          if (data.success) {
+            const item = data.data.challenge_info;
+            const item_start_datetime = data.data.challenge_info.start_datetime;
+            const videosArray = Object.values(data.data.videos);
+            console.log('Videos:', videosArray);
+            console.log('Fetched items:', item);
+            setChallengeDetails(item);
+            setItem_start_datetime(item_start_datetime);
+            setVideolist(videosArray);
+          } else {
+            console.error('Failed to fetch video data:', data);
+          }
+        } catch (error) {
+          console.error('Error fetching video data:', error.message);
+          if (error.response) {
+            console.error('Error response data:', error.response.data);
+          }
+        }
+      };
+    
+      useEffect(() => {
+        console.log('useEffect called with videoId:', videoId); // Log to confirm useEffect is running
+        fetchItems(videoId);
+      }, [videoId]);
+    
+      useEffect(() => {
+        console.log('Updated Challenge details state:', challengeDetails);
+      }, [challengeDetails]);
+  
+
+  
 
     const handleBackButtonPress = () => {
         setBackAlertVisible(true);
@@ -64,46 +134,7 @@ const AcceptChallenge = () => {
         setActivePage(''); 
     };
 
-    const data = [
-        {
-            id: 2501,
-            name: '小明',
-            challenge: '挑戰：10日數學自習',
-            details: '限時：1日 10條H/日',
-            dateStart: '12 / 12 / 2023',
-            dateEnd: '12 / 12 / 2023',
-            progress: 70 
-        },
-        {
-            id: 2502,
-            name: '小明',
-            challenge: '挑戰：10日數學自習',
-            details: '限時：1日 10條H/日',
-            dateStart: '12 / 12 / 2023',
-            dateEnd: '12 / 12 / 2023',
-            progress: 50 
-        },
-        {
-            id: 2503,
-            name: '小明',
-            challenge: '挑戰：10日數學自習',
-            details: '限時：1日 10條H/日',
-            dateStart: '12 / 12 / 2023',
-            dateEnd: '12 / 12 / 2023',
-            progress: 30 
-        },
-        {
-            id: 2504,
-            name: '小明',
-            challenge: '挑戰：10日數學自習',
-            details: '限時：1日 10條H/日',
-            dateStart: '12 / 12 / 2023',
-            dateEnd: '12 / 12 / 2023',
-            progress: 90 
-        }
-    ];
-
-    const [videolist, setVideolist] = useState([
+    const [] = useState([
         {
             title: "title1",
             id: "video1",
@@ -133,6 +164,27 @@ const AcceptChallenge = () => {
         },
     ]);
 
+
+    const renderHearts = (chance) => {
+        const hearts = [];
+        for (let i = 0; i < 3; i++) {
+          hearts.push(
+            <Image
+              key={i}
+              source={i < chance ? require('../pictures/Heart Full.png') : require('../pictures/Heart Empty.png')}
+              style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]}
+            />
+          );
+        }
+        return hearts;
+      };
+      
+
+      const formatDate = (dateTimeString) => {
+        return dateTimeString.split(' ')[0];
+      };
+    
+
     return (
         <SafeAreaView style={styles.aCPageContainer}>                    
             <ScrollView contentContainerStyle={styles.aCScrollViewContent1}>
@@ -159,32 +211,23 @@ const AcceptChallenge = () => {
                         />
                     </View>
                 )}
-                <View key={message.id} style={styles.aCCard}>
+                <View key={challengeDetails.id} style={styles.aCCard}>
                     <View style={styles.aCCardHeader}>
                         <View style={styles.aCCardTitle1}>
-                            <Text style={styles.aCTitle}>{`#${message.id}`}</Text>
+                            <Text style={styles.aCTitle}>{`#${challengeDetails.id}`}</Text>
                             <Image source={require('../pictures/Account Icon Black.png')} style={styles.aCProfileImage} />
                         </View>      
                         <View style={styles.aCCardTitle2}>      
-                            <Text style={[styles.aCSubtitle, isSmallScreen && styles.aCSubtitleSmall]}>{message.challenge}</Text>
-                            <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>{message.details}</Text>
+                            <Text style={[styles.aCSubtitle, isSmallScreen && styles.aCSubtitleSmall]}>{challengeDetails.title}</Text>
+                            <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>{formatDate(item_start_datetime.date)}</Text>
+                            <Text style={[styles.aCDetails, isSmallScreen && styles.aCDetailsSmall]}>限時{challengeDetails.total_day}日   {challengeDetails.no_of_video_per_day} 條片 / 日</Text>
                         </View>
                     </View>
                     <View style={styles.aCChancesContainer}>
                         <Text style={[styles.aCChancesText, isSmallScreen && styles.aCChancesTextSmall]}>機會</Text>
                         <View style={styles.aCHeartsContainer}>
-                            <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
-                            <Image source={require('../pictures/Heart Full.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
-                            <Image source={require('../pictures/Heart Empty.png')} style={[styles.aCHeartIcon, isSmallScreen && styles.aCHeartIconSmall]} />
+                            {renderHearts(challengeDetails.chance)}
                         </View>
-                    </View>
-                    <View style={styles.aCCardActions}>
-                        <TouchableOpacity style={styles.aCRejectButton}>
-                            <Text style={styles.aCButtonText}>拒絕</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity style={styles.aCDetailsButton}>
-                            <Text style={styles.aCButtonText}>詳情</Text>
-                        </TouchableOpacity>
                     </View>
                 </View>
                 <View>
@@ -192,31 +235,31 @@ const AcceptChallenge = () => {
                 </View>
                 <FlatList
                     data={videolist}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (
                         <View style={styles.videoItem}>
-                            {/* Thumbnail */}
-                            <TouchableOpacity onPress={() => { /* handleVideoPress(item) */ }}>
-                                <View style={styles.thumbnail} />
-                            </TouchableOpacity>
-                            <View style={styles.videotext}>
-                                <View style={styles.logoandtitle}>
-                                    <View style={styles.logoContainer}>
-                                        <Image source={{ uri: item.logo }} style={styles.logo} />
-                                        <Text style={styles.logoTitle}>{item.logotitle}</Text>
-                                    </View>
-                                    <View>
-                                        <Text style={styles.videoTitle}>{item.title}</Text>
-                                        <View style={styles.termsContainer}>
-                                            {item.term.map((term, index) => (
-                                                <TouchableOpacity key={index} style={styles.term}>
-                                                    <Text style={styles.termText}>{term}</Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
-                                    </View>
+                        {/* Thumbnail */}
+                        <TouchableOpacity onPress={() => { /* handleVideoPress(item) */ }}>
+                            <View style={styles.thumbnail} />
+                        </TouchableOpacity>
+                        <View style={styles.videotext}>
+                            <View style={styles.logoandtitle}>
+                            <View style={styles.logoContainer}>
+                                <Image source={{ uri: item.logo }} style={styles.logo} />
+                                <Text style={styles.logoTitle}>{item.logotitle}</Text>
+                            </View>
+                            <View>
+                                <Text style={styles.videoTitle}>{item.title}</Text>
+                                <View style={styles.termsContainer}>
+                                {item.elective_list.map((term, index) => (
+                                    <TouchableOpacity key={index} style={styles.term}>
+                                    <Text style={styles.termText}>{term}</Text>
+                                    </TouchableOpacity>
+                                ))}
                                 </View>
                             </View>
+                            </View>
+                        </View>
                         </View>
                     )}
                     horizontal={true}
@@ -316,6 +359,7 @@ const styles = StyleSheet.create({
         elevation: 3,
         width: width * 0.91,
         alignSelf: 'center',
+        paddingBottom: 20,
     },
     aCCardHeader: {
         flexDirection: 'row',
@@ -350,22 +394,22 @@ const styles = StyleSheet.create({
     aCSubtitle: {
         fontSize: 14,
         color: '#555',
-        padding: 5,
+        padding: 3,
     },   
     aCSubtitleSmall: {
         fontSize: 13,
         color: '#555',
-        padding: 5,
+        padding: 3,
     },   
     aCDetails: {
         fontSize: 12,
         color: '#777',
-        padding: 5,
+        padding: 3,
     },
     aCDetailsSmall: {
         fontSize: 11,
         color: '#777',
-        padding: 5,
+        padding: 3,
     },
     aCChancesContainer: {
         position: 'absolute',

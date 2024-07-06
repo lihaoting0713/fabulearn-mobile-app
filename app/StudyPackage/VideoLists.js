@@ -1,5 +1,5 @@
 // VideoList.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
     StyleSheet,
     Text,
@@ -17,48 +17,37 @@ import {
   } from "react-native";
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";
 import BottomNavBar from '../components/BottomNavBar';
 import axios from 'axios'; 
 
 const VideoList = ({ route }) => {
   const { videoId } = route.params;
+  const { topic } = route.params;
   const navigation = useNavigation();
-
-  // Set up the state for the video list
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
   const [modalVisible, setModalVisible] = useState(false);
   const [videoListsItems,setVideoListsItems] = useState([]);
   const [packageDetails,setPackageDetails] = useState([]);
-  const [videolist, setVideolist] = useState([
-    {
-      title: "title1",
-      id: "video1",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-      likes: 3,
-      notes: 3,
-    },
-    {
-      title: "title2",
-      id: "video2",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-      likes: 5,
-      notes: 1,
-    },
-    {
-      title: "title3",
-      id: "video3",
-      logo: "",
-      logotitle: "數學",
-      term: ["#s1-term1", "#s1-term2", "#s1-term3"],
-      likes: 8,
-      notes: 2,
-    },
-  ]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [searchdate,setsearchdate] = useState(null)
+  const [searchsort,setsearchsort] = useState("name");
+  const [searchsubject,setsearchsubject] = useState("")
+  const [searcherfilter,setSearcherfilter] = useState(false);
+  const [searchlength,setsearchlength] = useState(null)
+  const [searchtext,setSearchtext] = useState("")
+  const [newhashtags, setNewhashtags] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const [openhashtagmodal, setOpenhashtagmodal] = useState(false);
+  const pickerRef = useRef();
+  const [originalVideoListsItems, setOriginalVideoListsItems] = useState([]);
+  const {PREVIOUSHASHTAG} = route.params
+  const [previoushashtag, setPrevioushashtag] = useState(PREVIOUSHASHTAG)
+  const [previoushashtagbackbutton, setPrevioushashtagbackbutton] = useState(false)
+  const [hashtags, setHashtags] = useState([]);
+  const [isloading, setIsloading] = useState(false);
+
 
 
   const FetchVideoListsItems = async (videoId) => {
@@ -68,16 +57,15 @@ const VideoList = ({ route }) => {
       const response = await axios.get(url);
       const data = response.data;
 
-      console.log(data);
-
-      
-
       if (data.success) {
         const packageDetails = data.data;
         const items = Object.values(data.data.videos_in_package);
+        setOriginalVideoListsItems(items); 
         setVideoListsItems(items);
         setPackageDetails(packageDetails);
-       
+        if (items.length > 0) {
+          setsearchsubject(items[0].subject.toLowerCase()); // Lock the subject to the first video's subject
+        } 
       } else {
         console.error('Failed to fetch video data:', data);
       }
@@ -89,19 +77,89 @@ const VideoList = ({ route }) => {
     }
   };
 
+
   useEffect(() => {
     FetchVideoListsItems (videoId);
   }, [videoId]);
 
 
-
+  const filterAndSortVideos = (videos, sort, searchdate, searchlength) => {
+    let filteredVideos = videos;
   
+    if (sort === 'title') {
+      filteredVideos.sort((a, b) => a.title.localeCompare(b.title, 'zh'));
+    } else if (sort === 'date') {
+      filteredVideos.sort((a, b) => new Date(a.added_datetime) - new Date(b.added_datetime));
+    }
+
+    if (searchdate && searchdate !== 'none') { // Check if searchdate is not 'none'
+      const currentDate = new Date();
+      let compareDate = new Date();
+      if (searchdate === "oneweek") {
+        compareDate.setDate(currentDate.getDate() - 7);
+      } else if (searchdate === "onemonth") {
+        compareDate.setMonth(currentDate.getMonth() - 1);
+      } else if (searchdate === "threemonths") {
+        compareDate.setMonth(currentDate.getMonth() - 3);
+      }
+      filteredVideos = filteredVideos.filter(item => new Date(item.added_datetime) >= compareDate);
+    }
+  
+    if (searchlength) {
+      filteredVideos = filteredVideos.filter(item => {
+        const [minutes, seconds] = item.duration.string.split(':').map(Number);
+        const totalSeconds = minutes * 60 + seconds;
+  
+        if (searchlength === "onetofive") {
+          return totalSeconds >= 60 && totalSeconds <= 300;
+        } else if (searchlength === "fivetoten") {
+          return totalSeconds > 300 && totalSeconds <= 600;
+        } else if (searchlength === "tenabove") {
+          return totalSeconds > 600;
+        }
+        return true;
+      });
+    }
+    return filteredVideos;
+  };
+
+
+  const handleFilter = (videoId, searchsort, searchdate, searchlength) => {
+    const filteredData = filterAndSortVideos(originalVideoListsItems, searchsort, searchdate, searchlength);
+    setVideoListsItems(filteredData);
+  };
+
+
+  const getsearchdata = async (videos, searchtext) => {
+    let filteredVideos = videos;
+    console.log(`searchtext: ${searchtext}`);
+    if (searchtext) {
+        filteredVideos = filteredVideos.filter(item => item.title === searchtext);
+    }
+    return filteredVideos;
+  };
 
 
   const handleVideoPress = (video) => {
     // Navigate to the VideoPlayer screen
     navigation.navigate('VideoPlayer', {video});
   };
+
+
+  const loadmore = () => {
+    console.log("loadmore");
+    setIsloading(true);
+  }
+
+  const handleSearch = async () => {
+    const filteredVideos = await getsearchdata(originalVideoListsItems, searchtext);
+    setVideoListsItems(filteredVideos);
+};
+
+
+const handleSearchTextChange = useCallback((text) => {
+  setSearchtext(text);
+}, []);
 
   const renderHeader = () => (
     <View>
@@ -121,41 +179,40 @@ const VideoList = ({ route }) => {
       </View>
       {showSearchBar && (
         <View style={styles.aCSearchBarOverlay1}>
-          <TextInput 
-            style={styles.aCSearchInput} 
-            placeholder="Search..."
-            placeholderTextColor="#aaa"
-          />
+           <TextInput
+              style={styles.aCSearchInput}
+              placeholder="Search"
+              placeholderTextColor="#aaa"
+              value={searchtext}
+              onChangeText={(text) => handleSearchTextChange(text)}
+              onSubmitEditing={handleSearch}
+            />
         </View>
       )}
     </View>
   );
 
+
+
+
   return (
-    <View style={styles.container}>
-        
+    <View style={styles.container}>    
       <ScrollView contentContainerStyle={styles.paddingBottom} >
       <FlatList
         data={videoListsItems}
         keyExtractor={(item) => item.id}
+        onEndReached={searcherfilter?null:loadmore}
         ListHeaderComponent={renderHeader}
         renderItem={({ item }) => (
-          <View style={styles.videoItem}>
-            {/* Thumbnail */}
-            
+          <View style={styles.videoItem}>      
             <View style={styles.videotext}>
-              <View style={styles.logoandtitle}>
-                {/* Logo and Logo Title */}
-                <View style={styles.logoContainer}>
-                  {/* Replace 'logo' with the actual image */}
+              <View style={styles.logoandtitle}>          
+                <View style={styles.logoContainer}>             
                   <Image source={{ uri: item.logo }} style={styles.logo} />
                   <Text style={styles.logoTitle}>{item.logotitle}</Text>
                 </View>
-
-                <View style={styles.videoDetails}>
-                  {/* Video Title */}
-                  <Text style={styles.videoTitle}>{item.title}</Text>
-                  {/* Terms */}
+                <View style={styles.videoDetails}>  
+                  <Text style={styles.videoTitle}>{item.title}</Text>     
                   <View style={styles.termsContainer}>
                     {item.hashtag.map((term, index) => (
                         <TouchableOpacity key={index} style={styles.term}>
@@ -188,7 +245,7 @@ const VideoList = ({ route }) => {
         scrollEnabled={false}
       />
       
-       <Modal
+      <Modal
         transparent={true}
         visible={searchfilterVisible}
         onRequestClose={() => setsearchfilterVisible(false)}
@@ -200,45 +257,71 @@ const VideoList = ({ route }) => {
               <View style={styles.modalItem}>
                 <Text>排序方式</Text>
                 <View style={styles.modalselect}>
-                  <Text>相關性</Text>
-                  <Ionicons
-                    name="chevron-down-sharp"
-                    size={25}
-                    color={"grey"}
-                  />
+                  <Picker
+                    style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchsort}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchsort(itemValue)
+                    }
+                  >
+                    <Picker.Item label="名稱" value="title"/>
+                    <Picker.Item label="日期" value="date"/>                    
+                  </Picker>
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>科目</Text>
                 <View style={styles.modalselect}>
-                  <Text>英文</Text>
-                  <Ionicons
-                    name="chevron-down-sharp"
-                    size={25}
-                    color={"grey"}
-                  />
+                  <Picker
+                    style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchsubject}
+                    enabled={false}  // Make the picker read-only
+                  >
+                    <Picker.Item label="中文" value="chinese"/>
+                    <Picker.Item label="英文" value="english"/>
+                    <Picker.Item label="數學" value="math"/>
+                    <Picker.Item label="科學" value="science"/>
+                    <Picker.Item label="共通能力" value="other"/>
+                  </Picker>
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>上載日期</Text>
                 <View style={styles.modalselect}>
-                  <Text>不限時間</Text>
-                  <Ionicons
-                    name="chevron-down-sharp"
-                    size={25}
-                    color={"grey"}
-                  />
+                <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchdate}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchdate(itemValue)
+                    }
+                  >
+                    <Picker.Item label="不限時期" value= "none"/>
+                    <Picker.Item label="最近一週" value="oneweek"/>
+                    <Picker.Item label="最近一個月" value="onemonth"/>
+                    <Picker.Item label="最近三個月" value="threemonth"/>
+
+                  </Picker>
                 </View>
               </View>
               <View style={styles.modalItem}>
                 <Text>片長</Text>
                 <View style={styles.modalselect}>
-                  <Text>不限</Text>
-                  <Ionicons
-                    name="chevron-down-sharp"
-                    size={25}
-                    color={"grey"}
-                  />
+                <Picker
+                  style={styles.picker}
+                    ref={pickerRef}
+                    selectedValue={searchlength}
+                    onValueChange={(itemValue, itemIndex) =>
+                      setsearchlength(itemValue)
+                    }
+                  >
+                    <Picker.Item label="不限" value= "none"/>
+                    <Picker.Item label="1至5分鐘" value="onetofive"/>
+                    <Picker.Item label="5至10分鐘" value="fivetoten"/>
+                    <Picker.Item label="10分鐘以上" value="tenabove"/>
+                  </Picker>
                 </View>
               </View>
             </View>
@@ -251,7 +334,12 @@ const VideoList = ({ route }) => {
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalButtonYes}
-                onPress={() => setsearchfilterVisible(false)}
+                onPress={() => {
+                  setsearchfilterVisible(false)
+                  setSearchorfilter(true)
+                  setHashtags([])
+                  handleFilter(videoId, searchsort,  searchdate, searchlength);
+                }}
               >
                 <Text style={styles.modalButtonText}>確定</Text>
               </TouchableOpacity>
@@ -260,7 +348,6 @@ const VideoList = ({ route }) => {
         </View>
       </Modal>
       </ScrollView> 
-      
       <BottomNavBar />
     </View>
   );
@@ -493,7 +580,11 @@ const styles = StyleSheet.create({
       color: "white",
       fontSize: 16,
     },
-
+    picker: {
+      marginLeft: -40,
+      width: 150,
+      marginTop: -15,
+    },
 });
 
 export default VideoList;
