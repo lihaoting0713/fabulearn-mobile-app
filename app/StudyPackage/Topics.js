@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView } from 'react-native';
+import React, { useState, useEffect, useRef,  useCallback  } from 'react';
+import { View, Text, Modal, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, TextInput } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialCommunityIcons, Octicons } from "@expo/vector-icons";
 import axios from 'axios';
+import { Picker } from "@react-native-picker/picker";
 import BottomNavBar from '../components/BottomNavBar';
 
 const Topics = () => {
@@ -12,6 +13,13 @@ const Topics = () => {
   const [showSearchBar, setShowSearchBar] = useState(false);
   const [searchfilterVisible, setsearchfilterVisible] = useState(false); 
   const [items, setItems] = useState([]);
+  const [originalVideoListsItems, setOriginalVideoListsItems] = useState([]);
+  const [searchdate,setsearchdate] = useState(null)
+  const [searchsort,setsearchsort] = useState("name");
+  const [searchsubject,setsearchsubject] = useState("")
+  const [searchlength,setsearchlength] = useState(null)
+  const [searchtext,setSearchtext] = useState("")
+  const pickerRef = useRef();
 
   const fetchItems = async () => {
     try {
@@ -21,7 +29,12 @@ const Topics = () => {
 
       if (data.success) {
         const topicItems = Object.values(data.data).filter(item => item.topic === topic);
+        setOriginalVideoListsItems(topicItems); 
         setItems(topicItems);
+
+        if (items.length > 0) {
+          setsearchsubject(items[0].subject.toLowerCase()); // Lock the subject to the first video's subject
+        } 
       } else {
         console.error('Failed to fetch video data:', data);
       }
@@ -37,9 +50,76 @@ const Topics = () => {
     fetchItems();
   }, [topic]);
 
+
+
+  const filterAndSortVideos = (videos, sort, searchdate, searchlength) => {
+    let filteredVideos = videos;
+  
+    if (sort === 'title') {
+      filteredVideos.sort((a, b) => a.title.localeCompare(b.title, 'zh'));
+    } else if (sort === 'date') {
+      filteredVideos.sort((a, b) => new Date(a.added_datetime) - new Date(b.added_datetime));
+    }
+
+    if (searchdate && searchdate !== 'none') { // Check if searchdate is not 'none'
+      const currentDate = new Date();
+      let compareDate = new Date();
+
+      if (searchdate === "oneweek") {
+        compareDate.setDate(currentDate.getDate() - 7);
+      } else if (searchdate === "onemonth") {
+        compareDate.setMonth(currentDate.getMonth() - 1);
+      } else if (searchdate === "threemonths") {
+        compareDate.setMonth(currentDate.getMonth() - 3);
+      }
+      filteredVideos = filteredVideos.filter(item => new Date(item.added_datetime) >= compareDate);
+    }
+    if (searchlength) {
+      filteredVideos = filteredVideos.filter(item => {
+        const [minutes, seconds] = item.duration.string.split(':').map(Number);
+        const totalSeconds = minutes * 60 + seconds;
+  
+        if (searchlength === "onetofive") {
+          return totalSeconds >= 60 && totalSeconds <= 300;
+        } else if (searchlength === "fivetoten") {
+          return totalSeconds > 300 && totalSeconds <= 600;
+        } else if (searchlength === "tenabove") {
+          return totalSeconds > 600;
+        }
+        return true;
+      });
+    }
+    return filteredVideos;
+  };
+
+
+  const handleFilter = ( searchsort, searchdate, searchlength) => {
+    const filteredData = filterAndSortVideos(originalVideoListsItems, searchsort, searchdate, searchlength);
+    setItems(filteredData);
+  };
+
+
+  const getsearchdata = async (videos, searchtext) => {
+    let filteredVideos = videos;
+    console.log(`searchtext: ${searchtext}`);
+    if (searchtext) {
+        filteredVideos = filteredVideos.filter(item => item.title === searchtext);
+    }
+    return filteredVideos;
+  };
+
+  const handleSearch = async () => {
+    const filteredVideos = await getsearchdata(originalVideoListsItems, searchtext);
+    setItems(filteredVideos);
+  };
+
+  const handleSearchTextChange = useCallback((text) => {
+    setSearchtext(text);
+  }, []);
+
+  
+
   return (
-
-
 
     <SafeAreaView style={styles.lAContainer}>
             <Ionicons name="search" size={30} style={{ opacity: 0 }} />
@@ -61,10 +141,13 @@ const Topics = () => {
                 </View>
                 {showSearchBar && (
                     <View style={styles.aCSearchBarOverlay1}>
-                        <TextInput 
+                      <TextInput 
                         style={styles.aCSearchInput} 
                         placeholder="Search..."
                         placeholderTextColor="#aaa"
+                        value={searchtext}
+                        onChangeText={(text) => handleSearchTextChange(text)}
+                        onSubmitEditing={handleSearch}
                         />
                     </View>
                 )}
@@ -103,71 +186,103 @@ const Topics = () => {
                 transparent={true}
                 visible={searchfilterVisible}
                 onRequestClose={() => setsearchfilterVisible(false)}
-            >
+              >
                 <View style={styles.modalBackground}>
-                <View style={styles.modalContainer}>
+                  <View style={styles.modalContainer}>
                     <Text style={styles.modalTitle}>搜尋篩選器</Text>
                     <View style={styles.modalContent}>
-                    <View style={styles.modalItem}>
+                      <View style={styles.modalItem}>
                         <Text>排序方式</Text>
                         <View style={styles.modalselect}>
-                        <Text>相關性</Text>
-                        <Ionicons
-                            name="chevron-down-sharp"
-                            size={25}
-                            color={"grey"}
-                        />
+                          <Picker
+                            style={styles.picker}
+                            ref={pickerRef}
+                            selectedValue={searchsort}
+                            onValueChange={(itemValue, itemIndex) =>
+                              setsearchsort(itemValue)
+                            }
+                          >
+                            <Picker.Item label="名稱" value="title"/>
+                            <Picker.Item label="日期" value="date"/>                    
+                          </Picker>
+
                         </View>
-                    </View>
-                    <View style={styles.modalItem}>
+                      </View>
+                      <View style={styles.modalItem}>
                         <Text>科目</Text>
                         <View style={styles.modalselect}>
-                        <Text>英文</Text>
-                        <Ionicons
-                            name="chevron-down-sharp"
-                            size={25}
-                            color={"grey"}
-                        />
+                          <Picker
+                            style={styles.picker}
+                            ref={pickerRef}
+                            selectedValue={searchsubject}
+                            enabled={false}  // Make the picker read-only
+                          >
+                            <Picker.Item label="中文" value="chinese"/>
+                            <Picker.Item label="英文" value="english"/>
+                            <Picker.Item label="數學" value="math"/>
+                            <Picker.Item label="科學" value="science"/>
+                            <Picker.Item label="共通能力" value="other"/>
+                          </Picker>
                         </View>
-                    </View>
-                    <View style={styles.modalItem}>
+                      </View>
+                      <View style={styles.modalItem}>
                         <Text>上載日期</Text>
                         <View style={styles.modalselect}>
-                        <Text>不限時間</Text>
-                        <Ionicons
-                            name="chevron-down-sharp"
-                            size={25}
-                            color={"grey"}
-                        />
+                        <Picker
+                          style={styles.picker}
+                            ref={pickerRef}
+                            selectedValue={searchdate}
+                            onValueChange={(itemValue, itemIndex) =>
+                              setsearchdate(itemValue)
+                            }
+                          >
+                            <Picker.Item label="不限時期" value= "none"/>
+                            <Picker.Item label="最近一週" value="oneweek"/>
+                            <Picker.Item label="最近一個月" value="onemonth"/>
+                            <Picker.Item label="最近三個月" value="threemonth"/>
+
+                          </Picker>
                         </View>
-                    </View>
-                    <View style={styles.modalItem}>
+                      </View>
+                      <View style={styles.modalItem}>
                         <Text>片長</Text>
                         <View style={styles.modalselect}>
-                        <Text>不限</Text>
-                        <Ionicons
-                            name="chevron-down-sharp"
-                            size={25}
-                            color={"grey"}
-                        />
+                        <Picker
+                          style={styles.picker}
+                            ref={pickerRef}
+                            selectedValue={searchlength}
+                            onValueChange={(itemValue, itemIndex) =>
+                              setsearchlength(itemValue)
+                            }
+                          >
+                            <Picker.Item label="不限" value= "none"/>
+                            <Picker.Item label="1至5分鐘" value="onetofive"/>
+                            <Picker.Item label="5至10分鐘" value="fivetoten"/>
+                            <Picker.Item label="10分鐘以上" value="tenabove"/>
+                          </Picker>
                         </View>
-                    </View>
+                      </View>
                     </View>
                     <View style={styles.modalButtons}>
-                    <TouchableOpacity
+                      <TouchableOpacity
                         style={styles.modalButtonNo}
                         onPress={() => setsearchfilterVisible(false)}
-                    >
+                      >
                         <Text style={styles.modalButtonText}>取消</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                      </TouchableOpacity>
+                      <TouchableOpacity
                         style={styles.modalButtonYes}
-                        onPress={() => setsearchfilterVisible(false)}
-                    >
+                        onPress={() => {
+                          setsearchfilterVisible(false)
+                          setSearchorfilter(true)
+                          setHashtags([])
+                          handleFilter(videoId, searchsort,  searchdate, searchlength);
+                        }}
+                      >
                         <Text style={styles.modalButtonText}>確定</Text>
-                    </TouchableOpacity>
+                      </TouchableOpacity>
                     </View>
-                </View>
+                  </View>
                 </View>
             </Modal>
                 
@@ -341,62 +456,67 @@ IACardDetailsStats:{
     fontWeight:'bold',
 },
 modalBackground: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContainer: {
-    width: 300,
-    backgroundColor: "white",
-    borderRadius: 10,
-    paddingHorizontal: 20,
-    paddingVertical: 25,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  modalContent: {
-    width: "100%",
-    marginBottom: 20,
-  },
-  modalItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 10,
-  },
-  modalselect: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: 100,
-  },
-  modalButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  modalButtonNo: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "#fd5c63",
-    marginHorizontal: 10,
-    borderRadius: 30,
-  },
-  modalButtonYes: {
-    flex: 1,
-    alignItems: "center",
-    padding: 10,
-    backgroundColor: "#00A3A3",
-    marginHorizontal: 10,
-    borderRadius: 30,
-  },
-  modalButtonText: {
-    color: "white",
-    fontSize: 16,
-  },
+  flex: 1,
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+},
+modalContainer: {
+  width: 300,
+  backgroundColor: "white",
+  borderRadius: 10,
+  paddingHorizontal: 20,
+  paddingVertical: 25,
+},
+modalTitle: {
+  fontSize: 20,
+  fontWeight: "bold",
+  marginBottom: 20,
+},
+modalContent: {
+  width: "100%",
+  marginBottom: 20,
+},
+modalItem: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  marginBottom: 10,
+},
+modalselect: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  width: 100,
+},
+modalButtons: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  width: "100%",
+},
+modalButtonNo: {
+  flex: 1,
+  alignItems: "center",
+  padding: 10,
+  backgroundColor: "#fd5c63",
+  marginHorizontal: 10,
+  borderRadius: 30,
+},
+modalButtonYes: {
+  flex: 1,
+  alignItems: "center",
+  padding: 10,
+  backgroundColor: "#00A3A3",
+  marginHorizontal: 10,
+  borderRadius: 30,
+},
+modalButtonText: {
+  color: "white",
+  fontSize: 16,
+},
+picker: {
+  marginLeft: -40,
+  width: 150,
+  marginTop: -15,
+},
 });
 
 export default Topics;
