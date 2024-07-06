@@ -45,22 +45,22 @@ const getAwardIcon = (name) => {
             return require('../pictures/badge/watch_chi_video_rank_3.png');
         case 'watch_chi_video_rank_4':
             return require('../pictures/badge/watch_chi_video_rank_4.png');
-        case 'watch_eng_video_rank_1':
-            return require('../pictures/badge/watch_eng_video_rank_1.png');
-        case 'watch_eng_video_rank_2':
-            return require('../pictures/badge/watch_eng_video_rank_2.png');
-        case 'watch_eng_video_rank_3':
-            return require('../pictures/badge/watch_eng_video_rank_3.png');
-        case 'watch_eng_video_rank_4':
-            return require('../pictures/badge/watch_eng_video_rank_4.png');
-        case 'watch_math_video_rank_1':
-            return require('../pictures/badge/watch_math_video_rank_1.png');
-        case 'watch_math_video_rank_2':
-            return require('../pictures/badge/watch_math_video_rank_2.png');
-        case 'watch_math_video_rank_3':
-            return require('../pictures/badge/watch_math_video_rank_3.png');
-        case 'watch_math_video_rank_4':
-            return require('../pictures/badge/watch_math_video_rank_4.png');
+        case 'watch_english_video_rank_1':
+            return require('../pictures/badge/watch_english_video_rank_1.png');
+        case 'watch_english_video_rank_2':
+            return require('../pictures/badge/watch_english_video_rank_2.png');
+        case 'watch_english_video_rank_3':
+            return require('../pictures/badge/watch_english_video_rank_3.png');
+        case 'watch_english_video_rank_4':
+            return require('../pictures/badge/watch_english_video_rank_4.png');
+        case 'watch_maths_video_rank_1':
+            return require('../pictures/badge/watch_maths_video_rank_1.png');
+        case 'watch_maths_video_rank_2':
+            return require('../pictures/badge/watch_maths_video_rank_2.png');
+        case 'watch_maths_video_rank_3':
+            return require('../pictures/badge/watch_maths_video_rank_3.png');
+        case 'watch_maths_video_rank_4':
+            return require('../pictures/badge/watch_maths_video_rank_4.png');
         case 'watch_sci_video_rank_1':
             return require('../pictures/badge/watch_sci_video_rank_1.png');
         case 'watch_sci_video_rank_2':
@@ -73,6 +73,20 @@ const getAwardIcon = (name) => {
             return require('../pictures/badge/locked.png');
     }
 };
+
+function extractValues(str) {
+    // Remove square brackets and extra spaces
+    const cleanedStr = str.replace(/[\[\]]/g, '').trim();
+
+    // Split the string by '/'
+    const values = cleanedStr.split('/').map(value => value.trim());
+
+    // Convert strings to numbers
+    const num1 = parseInt(values[0], 10);
+    const num2 = parseInt(values[1], 10);
+
+    return num1 === num2
+}
 
 useEffect(() => {
     getbadge()
@@ -102,13 +116,24 @@ useEffect(() => {
                         <View style={styles.awardsRow}>
                             {Object.values(item.status).map((award) => (
                                 <View key={award.name} style={styles.awardContainer}>
-                                    <Image source={getAwardIcon(award.name)}/>
+                                    {console.log("award.current_status",typeof(award.current_status))}
+                                    {award.isAchieved===true?
+                                    <Image style={styles.awardicon} source={getAwardIcon(award.name)}/>
+                                    :
+                                    <Image style={styles.awardicon} source={require('../pictures/badge/locked.png')}/>
+                                    }
+
                                     <Text style={styles.awarddescription}>
                                         {award.description_zh}
                                     </Text>
+                                    {award.isAchieved===true?
                                     <Text style={styles.awardstatus}>
-                                        {award.current_status}
                                     </Text>
+                                    :
+                                    <Text style={styles.awardstatus}>
+                                    {award.current_status}
+                                    </Text>
+                                    }   
                                 </View>
                             ))}
                         </View>
@@ -168,20 +193,24 @@ const styles = StyleSheet.create({
     awardContainer: {
         alignItems: 'center',
         justifyContent: 'center',
+        margin: 5,
     },
     awarddescription: {
         fontSize: 14,
+        width: 100,
+        textAlign: 'center',
     },
     awardstatus: {
         fontSize: 14,
+        textAlign: 'center',
     },
-    awardIcon: {
-        width: 100,
-        height: 100,
+    awardicon: {
+        width: 70,
+        height: 70,
         borderRadius: 100,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#FFF', // Circle background color
+        marginBottom: 5,
     },
     lockedIcon: {
         width: 30,
