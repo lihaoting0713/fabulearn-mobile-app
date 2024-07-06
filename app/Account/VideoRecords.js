@@ -226,7 +226,7 @@ function close() {
                       />
 
                   <View style={styles.titleContainer}>
-                    <Text style={styles.title}>影片庫</Text>
+                    <Text style={styles.title}>影片紀錄</Text>
                   </View>
                   <View style={styles.iconsContainer}>
                     <TouchableOpacity

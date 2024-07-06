@@ -444,7 +444,7 @@ const deletehashtag = (hashtag) => {
             <TouchableOpacity onPress={() => { 
               setHashtags([])
               setPrevioushashtag(null)
-              navigation.push("PlayVideos",{VIDEOID:item.id,VIDEODATA:item}); 
+              navigation.push("PlayVideos",{VIDEOID:item.id,VIDEOPATH:item.video_path}); 
               }}>
               <View style={styles.thumbnail}>
                 <Image source={{ uri: item.thumbnail }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />

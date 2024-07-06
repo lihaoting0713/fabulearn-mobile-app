@@ -97,7 +97,7 @@ function AccountScreen({navigation}) {
             <Image source={require(usericon)} style={styles.usericon} />
           }
           <Text style={styles.username}>{profile? profile.first_name:null} {profile? profile.last_name:null}</Text>
-
+          <View style={styles.flatlistcontainer}>
           <FlatList
             style={styles.list}
             data={accountlist}
@@ -112,6 +112,7 @@ function AccountScreen({navigation}) {
               </View>
             )}
           />
+          </View>
         </View>
         } 
       </ScrollView>
@@ -167,11 +168,13 @@ const styles = StyleSheet.create({
     marginTop: 40,
     width: '100%',
   },
+  flatlistcontainer: {
+  },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginHorizontal: 30,  
+    marginRight: 60,  
   },
   text: {
     fontSize: 20,

@@ -29,9 +29,10 @@ function PlayVideos({route}) {
   const [isloading, setisloading] = useState(true);
   const { VIDEOID } = route.params;
   const {VIDEODATA} = route.params;
+  const {VIDEPATH} = route.params;
   const[videoid, setVideoid] = useState(VIDEOID);
   const [featuredVideo, setFeaturedVideo] = useState(VIDEODATA);
-  const videosource = featuredVideo.video_path;
+  const videosource = VIDEPATH
   const [featuredVideodetails, setFeaturedVideodetails] = useState({});
   const video = React.useRef(null);
   const [isvideoClicked, setisvideoClicked] = useState(false);
@@ -729,18 +730,18 @@ const subjectinchinese = {
                 <View style={{flexDirection:"row"}}>
 
                 <View style={styles.logoandlogotitleLarge}>
-                <SvgUri uri={subjecticon[featuredVideo.subject.toLowerCase()]} style={styles.logoLarge} />
+                <SvgUri uri={subjecticon[featuredVideodetails.subject.toLowerCase()]} style={styles.logoLarge} />
                   <Text style={styles.logotitleLarge}>
-                    {subjectinchinese[featuredVideo.subject.toLowerCase()]}
+                    {subjectinchinese[featuredVideodetails.subject.toLowerCase()]}
                   </Text>
                 </View>
                 <View style={styles.titleandtermLarge}>
                   <Text style={styles.videoTitleLarge}
                   >
-                    {featuredVideo.title}
+                    {featuredVideodetails.title}
                   </Text>
                   <View style={styles.termsContainerLarge}>
-                    {featuredVideo.hashtag.map((term, index) => (
+                    {featuredVideodetails.hashtag.map((term, index) => (
                       <TouchableOpacity key={index} onPress={()=>{
                         console.log("term:",term)
                         navigation.push("VideoLibrary",{PREVIOUSHASHTAG:term})
@@ -768,9 +769,9 @@ const subjectinchinese = {
                     />
                     :
                     <TouchableOpacity onPress={()=>setisvideoClicked(true)}>
-                    <Image source={{ uri: featuredVideo.thumbnail }} style={styles.thumbnailLarge} />
+                    <Image source={{ uri: featuredVideodetails.thumbnail }} style={styles.thumbnailLarge} />
                     <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={{position:"absolute",top:65,right:125}}/>
-                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideo.duration.string}</Text>
+                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideodetails.duration.string}</Text>
                     </TouchableOpacity>
               }
               </View>

@@ -14,16 +14,43 @@ import { Ionicons, Feather, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 function CreateAccount() {
-  const [Username, setUsername] = useState("");
+  const [first_name, setfirst_name] = useState("");
+  const [last_name, setlast_name] = useState("");
   const [mail, setmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordconfirm, setPasswordconfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const navigation = useNavigation();
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const register = async (mail,first_name,last_name) => {
+    try{ 
+    const url = "https://schools.fabulearn.net/api/register";
+    const form = new FormData();
+    form.append("platform", "bliss")
+    form.append("email", mail);
+    form.append("first_name", first_name);
+    form.append("last_name", last_name);
+    const response = await fetch(url, {
+      method: "POST",
+      body: form,
+    });
+    const data = await response.json();
+    console.log(data);
+    if(data.success==true){
+      alert("註冊成功");
+      navigation.goBack();
+    }
+    else{
+      alert(data.error);
+    }
+  }
+  catch (error) {
+    console.error(error);
+    alert("註冊失敗");
+  }
   };
 
   return (
@@ -42,12 +69,23 @@ function CreateAccount() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>用戶名稱</Text>
+            <Text style={styles.label}>名稱</Text>
             <View style={styles.passwordInputContainer}>
               <TextInput
                 style={styles.input}
-                value={Username}
-                onChangeText={setUsername}
+                value={first_name}
+                onChangeText={setfirst_name}
+              />
+            </View>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Text style={styles.label}>姓氏</Text>
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={styles.input}
+                value={last_name}
+                onChangeText={setlast_name}
               />
             </View>
           </View>
@@ -63,55 +101,14 @@ function CreateAccount() {
             </View>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>密碼</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                onPress={togglePasswordVisibility}
-                style={styles.eyeIcon}
-              >
-                <Feather
-                  name={showPassword ? "eye" : "eye-off"}
-                  size={24}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>確認密碼</Text>
-            <View style={styles.passwordInputContainer}>
-              <TextInput
-                style={styles.input}
-                value={passwordconfirm}
-                onChangeText={setPasswordconfirm}
-                secureTextEntry={!showPassword}
-              />
-              <TouchableOpacity
-                onPress={togglePasswordVisibility}
-                style={styles.eyeIcon}
-              >
-                <Feather
-                  name={showPassword ? "eye" : "eye-off"}
-                  size={24}
-                  color="gray"
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
 
           <View style={styles.buttonscontainer}>
             <TouchableOpacity style={styles.resetButton}>
               <Text style={styles.resetButtonText}>重置</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.confirmButton}>
+            <TouchableOpacity style={styles.confirmButton} onPress={()=>{
+              register(mail,first_name,last_name);
+            }}>
               <Text style={styles.confirmButtonText}>確定</Text>
             </TouchableOpacity>
           </View>

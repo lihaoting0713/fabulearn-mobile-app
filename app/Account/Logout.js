@@ -123,7 +123,7 @@ function Logout() {
 
                     <View style={styles.forgotpwcontainer}>
                         <TouchableOpacity onPress={()=>navigation.navigate("ForgetPassword")}>
-                        <Text style={{textAlign:'right'}}>Forgot password</Text>
+                        <Text style={{textAlign:'right'}}>忘記密碼</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -137,7 +137,7 @@ function Logout() {
                     
                     <View style={styles.createaccontainer}>
                         <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                        <Text style={{textAlign:'right'}}>create account</Text>
+                        <Text style={{textAlign:'right'}}>創建帳號</Text>
                         </TouchableOpacity>
                     </View>
 
