@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import * as Clipboard from 'expo-clipboard';
 import {Ionicons,Octicons,MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
@@ -21,7 +22,9 @@ import { useNavigation } from "@react-navigation/native";
 import { SvgUri } from "react-native-svg";
 import {Video} from 'expo-av';
 import * as SecureStore from 'expo-secure-store';
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
+var width = Dimensions.get('window').width; //full width
+var height = Dimensions.get('window').height; //full height
 
 
 function PlayVideos({route}) {
@@ -29,10 +32,10 @@ function PlayVideos({route}) {
   const [isloading, setisloading] = useState(true);
   const { VIDEOID } = route.params;
   const {VIDEODATA} = route.params;
-  const {VIDEPATH} = route.params;
+  const {VIDEOPATH} = route.params;
   const[videoid, setVideoid] = useState(VIDEOID);
   const [featuredVideo, setFeaturedVideo] = useState(VIDEODATA);
-  const videosource = VIDEPATH
+  const videosource = VIDEOPATH
   const [featuredVideodetails, setFeaturedVideodetails] = useState({});
   const video = React.useRef(null);
   const [isvideoClicked, setisvideoClicked] = useState(false);
@@ -755,7 +758,7 @@ const subjectinchinese = {
                 </View>
                 </View>
               </View>
-              <View>
+              <View style={styles.videocontainer}>
               {isvideoClicked ?
                     <Video
                     ref={video}
@@ -769,8 +772,12 @@ const subjectinchinese = {
                     />
                     :
                     <TouchableOpacity onPress={()=>setisvideoClicked(true)}>
+                      <View style={styles.wholevideocontainer}>
                     <Image source={{ uri: featuredVideodetails.thumbnail }} style={styles.thumbnailLarge} />
-                    <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={{position:"absolute",top:65,right:125}}/>
+                    <View style={styles.playbuttoncontainer}>
+                    <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={styles.playbutton}/>
+                    </View>
+                    </View>
                   <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideodetails.duration.string}</Text>
                     </TouchableOpacity>
               }
@@ -1225,9 +1232,12 @@ const styles = StyleSheet.create({
   titleandtermLarge: {
     marginLeft: 10,
   },
+  videocontainer: {
+    alignItems: "center",
+  },
   thumbnailLarge: {
-    width: "100%",
-    height: 200,
+    width: width/1.05,
+    height: width * (9 / 16),
     marginTop: 10,
     borderRadius: 10,
   },
@@ -1264,6 +1274,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     width: "70%",
+  },
+  wholevideocontainer:{
+    width: width/1.05,
+    height: width * (9 / 16),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  playbuttoncontainer:{
+    position: "absolute",
+  },
+  playbutton:{
   },
   buttonContainer: {
     flexDirection: "row",
