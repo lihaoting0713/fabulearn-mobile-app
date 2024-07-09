@@ -521,7 +521,7 @@ const deletehashtag = (hashtag) => {
             <Text style={styles.modalTitle}>搜尋篩選器</Text>
             <View style={styles.modalContent}>
               <View style={styles.modalItem}>
-                <Text>排序方式</Text>
+                <Text style={styles.modaltext}>排序方式</Text>
                 <View style={styles.modalselect}>
                   <Picker
                   style={styles.picker}
@@ -538,7 +538,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>科目</Text>
+                <Text style={styles.modaltext}>科目</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -557,7 +557,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>上載日期</Text>
+                <Text style={styles.modaltext}>上載日期</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -576,7 +576,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>片長</Text>
+                <Text style={styles.modaltext}>片長</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -834,7 +834,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    width: 300,
+    width: "80%",
     backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 20,
@@ -853,6 +853,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    width: "95%",
+    alignSelf: "center",
+  },
+  modaltext: {
+    alignSelf: "center",
+    fontSize: 16,
   },
   modalselect: {
     flexDirection: "row",
@@ -887,7 +893,7 @@ const styles = StyleSheet.create({
   picker: {
     marginLeft: -40,
     width: 150,
-    marginTop: -15,
+    marginTop: 0,
   },
 });
 

@@ -261,7 +261,7 @@ function close() {
               navigation.push(
                 "VideoStack",{
                 screen:"PlayVideos",
-                params:{VIDEOID:item.id,VIDEODATA:item}
+                params:{VIDEOID:item.id,VIDEODATA:item,VIDEOPATH:item.video_path}
               })}}>
               <View style={styles.thumbnail}>
                 <Image source={{ uri: item.thumbnail }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />
