@@ -31,8 +31,17 @@ function Logout() {
             },
             body: formdata
             });
+            const testpannelresponse = await fetch("http://192.168.18.12/api/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "multipart/form-data;"
+                },
+                body: formdata
+            });
             const data = await response.json();
             console.log(data);
+            const testpanneldata = await testpannelresponse.json();
+            console.log(testpanneldata);
             if(data.success === true){
                 console.log("login success")
                 await storelogin("true");

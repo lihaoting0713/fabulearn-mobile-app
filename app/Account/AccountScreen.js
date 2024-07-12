@@ -12,8 +12,7 @@ function AccountScreen({navigation}) {
   const logout = async () => {
     try {
       const url = `https://schools.fabulearn.net/api/logout`;
-      const response = await fetch(url
-      );
+      const response = await fetch(url);
       const data = await response.json();
       console.log("logout: ",data);
       await SecureStore.setItemAsync("isLogin", "false");
@@ -70,7 +69,7 @@ function AccountScreen({navigation}) {
 
 
   const [accountlist, setAccountlist] = useState([
-    { text: '設定', id: "setting", icon: 'settings-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('SettingNavigator')},
+    /*{ text: '設定', id: "setting", icon: 'settings-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('SettingNavigator')},*/
     { text: '影片記錄', id: "video_records", icon: 'history', icontype: Octicons, size: 30 , onPress: () => navigation.navigate('VideoRecordsNavigator')},
     { text: '收藏紀錄', id: "collection_records", icon: 'bookmark-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('CollectionRecordsNavigator')},
     { text: '筆記記錄', id: "note_records", icon: 'note', icontype: SimpleLineIcons, size: 30 , onPress: () => navigation.navigate('NoteRecordsNavigator')},
@@ -161,11 +160,11 @@ const styles = StyleSheet.create({
   username: {
     marginTop: 10,
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 10,
     color: '#00A3A3',
   },
   list: {
-    marginTop: 40,
+    marginTop: 10,
     width: '100%',
   },
   flatlistcontainer: {

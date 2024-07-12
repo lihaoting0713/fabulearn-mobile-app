@@ -110,8 +110,8 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         padding: 6,
         position: 'absolute',
-        top: "70%",
-        left: "15%",
+        top: 100,
+        left: 100,
     },
     inputContainer: {
         width: '100%',
