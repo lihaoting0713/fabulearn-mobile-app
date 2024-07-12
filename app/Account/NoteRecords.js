@@ -19,6 +19,7 @@ import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBa
 import { SvgUri } from "react-native-svg";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
 
 var width = Dimensions.get('window').width; //full width
 var height = Dimensions.get('window').height; //full height
@@ -58,18 +59,76 @@ function open() {
 function close() {
   pickerRef.current.blur();
 }
+
+const getAPIdata = async () => {
+  const baseURL = 'http://192.168.18.12/api';
+
+  let response;
+  try {
+    console.log('Attempting to log in...');
+    response = await axios.post(`${baseURL}/login`, {
+      login_id: 'student2@testing.com',
+      password: 'demo'
+    }, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      withCredentials: true
+    });
+    console.log('Login response:', response);
+  } catch (error) {
+    console.error('Error logging in:', error.message);
+    console.error('Error details:', error);
+    return;
+  }
+
+  let options = {};
+  let headers = {
+    'Content-Type': 'multipart/form-data'
+  };
+
+  if ('set-cookie' in response.headers) {
+    let cookie = response.headers['set-cookie'][0].split(';')[0];
+    headers['Cookie'] = cookie;
+  } else {
+    options['withCredentials'] = true;
+  }
+  options['headers'] = headers;
+
+  try {
+    const url = `${baseURL}/bliss/all-video-notes?format=video&limit=${pagenum}`;
+    console.log('Making request to:', url);
+    const Response = await axios.get(url, options);
+    console.log('response:', Response);
+    const data = Response.data;
+
+    if (data.success) {
+      const topicItems = data.data.results;
+      console.log('Fetched items:', topicItems);
+      setVideolist(topicItems);
+    } else {
+      console.error('Failed to fetch video data:', data);
+    }
+  } catch (error) {
+    console.error('Error fetching video data:', error.message);
+    if (error.response) {
+      console.error('Error response data:', error.response.data);
+    }
+  }
+};
   
-  const getAPIdata = async () => {
+  /*const getAPIdata = async () => {
     try {
       let url = `http://192.168.18.12/api/bliss/all-video-notes?format=video&limit=${pagenum}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      console.log(data)
+      const response = await axios.get(url);
+      const data = response.data;
+      console.log(data);
       setVideolist(data["data"]);
     } catch (error) {
       console.warn(error);
     }
   };
+  */
 
   const getsearchfilterdata = async (searchsort,searchsubject,searchdate,searchlength) => {
     try {
@@ -117,7 +176,68 @@ function close() {
     }
   };
 
-  const getsearchdata = async (searchtext) => {
+  const getsearchdata = async () => {
+    const baseURL = 'http://192.168.18.12/api';
+  
+    let response;
+    try {
+      console.log('Attempting to log in...');
+      response = await axios.post(`${baseURL}/login`, {
+        login_id: 'student2@testing.com',
+        password: 'demo'
+      }, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true
+      });
+      console.log('Login response:', response);
+    } catch (error) {
+      console.error('Error logging in:', error.message);
+      console.error('Error details:', error);
+      return;
+    }
+  
+    let options = {};
+    let headers = {
+      'Content-Type': 'multipart/form-data'
+    };
+  
+    if ('set-cookie' in response.headers) {
+      let cookie = response.headers['set-cookie'][0].split(';')[0];
+      headers['Cookie'] = cookie;
+    } else {
+      options['withCredentials'] = true;
+    }
+    options['headers'] = headers;
+  
+    try {
+      const url = `${baseURL}/bliss/all-video-notes?format=video&limit=${pagenum}`;
+      console.log('Making request to:', url);
+      const Response = await axios.get(url, options);
+      console.log('response:', Response);
+      const data = Response.data;
+  
+      if (data.success) {
+        let searcheddata = data.data.results;
+      searcheddata = searcheddata.filter(item => item.title.toLowerCase().includes(searchtext.toLowerCase()));
+      setVideolist(searcheddata);
+      console.log('Fetched items:', searcheddata);
+      if(searcheddata.length==0){
+        setNoresult(true)
+      }
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
+    } catch (error) {
+      console.error('Error fetching video data:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+    }
+  };
+
+  /* const getsearchdata = async (searchtext) => {
     try {
       console.log(`searchtext: ${searchtext}`)
       let url = `http://192.168.18.12/api/bliss/all-video-notes?`;
@@ -133,6 +253,7 @@ function close() {
       console.warn(error);
     }
   };
+  */
 
   useEffect(() => {
     getAPIdata();
@@ -225,12 +346,13 @@ function close() {
                     >
                       <Ionicons name="search" size={30} color="#00A3A3" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setsearchfilterVisible(true)}>
+                    <TouchableOpacity >
                       <MaterialCommunityIcons
                         name="dots-vertical"
                         size={30}
                         color="#00A3A3"
                         style={styles.moreIcon}
+                        opacity = {0}
                       />
                     </TouchableOpacity>
                   </View>
@@ -312,6 +434,7 @@ function close() {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>搜尋篩選器</Text>
+            <ScrollView>
             <View style={styles.modalContent}>
               <View style={styles.modalItem}>
                 <Text>排序方式</Text>
@@ -387,6 +510,7 @@ function close() {
                 </View>
               </View>
             </View>
+            </ScrollView>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.modalButtonNo}
@@ -627,6 +751,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: 300,
+    height: 300,
     backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 20,

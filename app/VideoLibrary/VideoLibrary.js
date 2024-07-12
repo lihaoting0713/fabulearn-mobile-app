@@ -519,6 +519,7 @@ const deletehashtag = (hashtag) => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>搜尋篩選器</Text>
+            <ScrollView>
             <View style={styles.modalContent}>
               <View style={styles.modalItem}>
                 <Text style={styles.modaltext}>排序方式</Text>
@@ -594,6 +595,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
             </View>
+            </ScrollView>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.modalButtonNo}
@@ -834,7 +836,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
   modalContainer: {
-    width: "80%",
+    width: 300,
+    height: 300,
     backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 20,

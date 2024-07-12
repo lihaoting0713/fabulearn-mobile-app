@@ -13,8 +13,11 @@ function AccountScreen({navigation}) {
     try {
       const url = `https://schools.fabulearn.net/api/logout`;
       const response = await fetch(url);
+      const testingresponse = await fetch("http://192.168.18.12/api/logout");
       const data = await response.json();
+      const testingdata = await testingresponse.json();
       console.log("logout: ",data);
+      console.log("testing logout: ",testingdata);
       await SecureStore.setItemAsync("isLogin", "false");
       await SecureStore.deleteItemAsync("Logined");
       console.log("isLogin status: ",await SecureStore.getItemAsync("isLogin"));
