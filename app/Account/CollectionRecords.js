@@ -158,7 +158,6 @@ function close() {
     getAPIdata();
   }, [pagenum]);
 
-
   const getsubjecticonapi = async (id) => {
     try {
       console.log(`id: ${id}`);
@@ -179,9 +178,11 @@ function close() {
       let url = `https://schools.fabulearn.net/api/bliss/videos/${id}`;
       const response = await fetch(url);
       const data = await response.json();
+      console.log(data)
       let subject = data["data"].subject;
       const subjectItem = subjectlist.find((item) => item.subject.toLowerCase() == subject.toLowerCase());
-      return subjectItem.text;
+      console.log(subjectItem['text'])
+      return subjectItem['text'];
     } catch (error) {
       console.warn(error);
     }
