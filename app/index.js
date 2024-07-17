@@ -36,8 +36,7 @@ export default function Index() {
 
   return (
     <Provider store={store}>
-      <MainStack.Navigator screenOptions={{ headerShown: false }}>
-        {isLogin ? (
+      <MainStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isLogin?'HomeScreen':"AccountStack"}>
           <>
             <MainStack.Screen name="HomeScreen" component={HomeScreen} />
             <MainStack.Screen name="VideoStack" component={VideoStack} />
@@ -46,9 +45,6 @@ export default function Index() {
             <MainStack.Screen name="AccountStack" component={AccountStack} />
             <MainStack.Screen name="ChallengeStack" component={ChallengeStack} />
           </>
-        ) : (
-          <MainStack.Screen name="AccountStack" component={AccountStack} />
-        )}
       </MainStack.Navigator>
     </Provider>
   );

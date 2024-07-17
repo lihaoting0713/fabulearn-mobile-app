@@ -50,6 +50,8 @@ function VideoRecords() {
   const [searchorfilter,setSearchorfilter] = useState(false)
   const [searchtext,setSearchtext] = useState("")
   const [refreshing, setRefreshing] = useState(false);
+  const [subjecticon, setSubjecticon] = useState("");
+  const [subjectname, setSubjectname] = useState("");
 
   const pickerRef = useRef();
 
@@ -156,6 +158,34 @@ function close() {
     getAPIdata();
   }, [pagenum]);
 
+
+  const getsubjecticonapi = async (id) => {
+    try {
+      console.log(`id: ${id}`);
+      let url = `https://schools.fabulearn.net/api/bliss/videos/${id}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      let subject = data["data"].subject;
+      const subjectItem = subjectlist.find((item) => item.subject.toLowerCase() == subject.toLowerCase());
+      return subjectItem.icon;
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  const getsubjectnameapi = async (id) => {
+    try {
+      console.log(`id: ${id}`);
+      let url = `https://schools.fabulearn.net/api/bliss/videos/${id}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      let subject = data["data"].subject;
+      const subjectItem = subjectlist.find((item) => item.subject.toLowerCase() == subject.toLowerCase());
+      return subjectItem.text;
+    } catch (error) {
+      console.warn(error);
+    }
+  };
 
   const getSubjectIcon = (subject) => {
     const subjectItem = subjectlist.find((item) => item.subject.toLowerCase() == subject.toLowerCase());
@@ -277,9 +307,9 @@ function close() {
                 <View style={styles.logoContainer}>
                 <View style={styles.circle}>
 
-                {/*<SvgUri width="100%" height="100%" />*/}
+                <SvgUri width="100%" height="100%" />
                 </View>
-                  {/*<Text style={styles.logoTitle}></Text>*/}
+                  <Text style={styles.logoTitle}>{item.info.id}</Text>
                 </View>
 
                 <View>
