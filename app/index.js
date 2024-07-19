@@ -21,8 +21,10 @@ export default function Index() {
   useEffect(() => {
     const checkLoginStatus = async () => {
       const loginStatus = await SecureStore.getItemAsync("isLogin");
+      const logindata = await SecureStore.getItemAsync("Logined");
       setIsLogin(loginStatus === "true");
     };
+    console.log("starting...")
     checkLoginStatus();
   }, []);
 
@@ -32,6 +34,28 @@ export default function Index() {
         <ActivityIndicator size="large" color="#0000ff" />
       </View>
     );
+  }
+
+  const ensurelogin = async (logindata) => {
+    try{
+      let url = "https://schools.fabulearn.net/api/login";
+      let formdata = new FormData();
+      console.log("logindata:",logindata)
+      const logindatajson = JSON.parse(logindata);
+      formdata.append("login_id", logindatajson.login_id);
+      formdata.append("password", logindatajson.password);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formdata,
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.warn(error);
+    }
   }
 
   return (

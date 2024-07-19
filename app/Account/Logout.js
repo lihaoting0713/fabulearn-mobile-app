@@ -42,11 +42,18 @@ function Logout() {
             console.log(data);
             const testpanneldata = await testpannelresponse.json();
             console.log(testpanneldata);
+            setlogin_id('');
+            setPassword('');
             if(data.success === true){
                 console.log("login success")
-                await storelogin("true");
+                let logindata = {
+                    login_id: login_id,
+                    password: password
+                }
+                console.log("logindata:",logindata)
+                await storelogin(JSON.stringify(logindata));
                 console.log("login status: ",await SecureStore.getItemAsync("Logined"))
-                if(SecureStore.getItemAsync("tabID")==null){
+                if(await getStoredTabID()==null){
                     const tabID = generateRandomInteger();
                     console.log("generated:",tabID)
                     await storeTabID(tabID);
