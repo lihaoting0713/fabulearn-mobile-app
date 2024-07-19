@@ -18,14 +18,51 @@ const MainStack = createNativeStackNavigator();
 export default function Index() {
   const [isLogin, setIsLogin] = useState(null);
 
+  const ensurelogin = async () => {
+    try{
+      const logindata = await SecureStore.getItemAsync("Logined");
+      console.log("starting...")
+      let url = "https://schools.fabulearn.net/api/login";
+      let formdata = new FormData();
+      console.log("logindata:",logindata)
+      const logindatajson = JSON.parse(logindata);
+      formdata.append("login_id", logindatajson.login_id);
+      formdata.append("password", logindatajson.password);
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        body: formdata,
+      });
+
+      const testpannelresponse = await fetch("http://192.168.18.12/api/login", {
+        method: 'POST',
+        headers: {
+            'Content-Type': "multipart/form-data;"
+        },
+        body: formdata
+    });
+
+      const data = await response.json();
+      const testpanneldata = await testpannelresponse.json();
+      console.log(data);
+      console.log(testpanneldata);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
+
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       const loginStatus = await SecureStore.getItemAsync("isLogin");
-      const logindata = await SecureStore.getItemAsync("Logined");
       setIsLogin(loginStatus === "true");
     };
-    console.log("starting...")
     checkLoginStatus();
+    ensurelogin();
   }, []);
 
   if (isLogin === null) {
@@ -36,28 +73,7 @@ export default function Index() {
     );
   }
 
-  const ensurelogin = async (logindata) => {
-    try{
-      let url = "https://schools.fabulearn.net/api/login";
-      let formdata = new FormData();
-      console.log("logindata:",logindata)
-      const logindatajson = JSON.parse(logindata);
-      formdata.append("login_id", logindatajson.login_id);
-      formdata.append("password", logindatajson.password);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        body: formdata,
-      });
-      const data = await response.json();
-      console.log(data);
-    } catch (error) {
-      console.warn(error);
-    }
-  }
-
+  
   return (
     <Provider store={store}>
       <MainStack.Navigator screenOptions={{ headerShown: false }} initialRouteName={isLogin?'HomeScreen':"AccountStack"}>
