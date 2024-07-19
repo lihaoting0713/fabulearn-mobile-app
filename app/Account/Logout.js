@@ -55,6 +55,7 @@ function Logout() {
                 else{
                     console.log("tabID already exists: ",await getStoredTabID())
                 }
+                navigation.navigate('AccountScreen');
                 navigation.navigate('HomeScreen');
             }
             else{
