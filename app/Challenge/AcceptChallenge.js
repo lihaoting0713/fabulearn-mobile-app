@@ -1,13 +1,11 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { Alert, Modal, Dimensions,  StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
+import { Alert, Modal, Dimensions, StyleSheet, View, Text, TextInput, TouchableOpacity, SafeAreaView, ScrollView, KeyboardAvoidingView, Platform, Keyboard, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons,Octicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
 import axios from 'axios'; 
-
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-
 
 const { width } = Dimensions.get('window');
 const isSmallScreen = width < 370;

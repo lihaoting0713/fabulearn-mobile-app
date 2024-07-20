@@ -4,19 +4,20 @@ import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, ScrollView, 
 import { useNavigation, useRoute } from '@react-navigation/native';
 import {Ionicons, Octicons, MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
 import BottomNavBar from '../components/BottomNavBar';
-import { VideoContext} from '../VideoContext';
 import { Video } from 'expo-av';
 import { useDispatch } from 'react-redux';
-import { setVideoId } from '../videoSlice'; // Ensure correct import path
+import { setVideoId } from '../videoSlice'; 
+import { fetchVideoDetails, recordWatchedVideo } from '../WatchedVideosAPI';
+import { useVideoContext } from '../VideoContext';
 
 const VideoPlayer = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const videoRef = useRef(null);
-  const { video } = route.params;
+  const { video, videoId } = route.params;
   const dispatch = useDispatch();
+  const { fetchHistoryVideos } = useVideoContext();
 
-  // Sample exercise data
   const exerciseData = [
     {
       id: '1',
@@ -32,23 +33,43 @@ const VideoPlayer = () => {
       answer: 'A. H2O',
       explanation: 'The chemical symbol for water is H2O.',
     },
-    // Add more exercise data as needed
   ];
 
-    const [currentQuestion, setCurrentQuestion] = useState(0);
-    const [selectedOption, setSelectedOption] = useState(null);
-    const [selectedVideo, setSelectedVideo] = useState(null);
-    const [isBuffering, setIsBuffering] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-    const [answers, setAnswers] = useState(Array(exerciseData.length).fill(null));
-    const [submissions, setSubmissions] = useState(Array(exerciseData.length).fill(false));
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [selectedVideo, setSelectedVideo] = useState(null);
+  const [isBuffering, setIsBuffering] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [answers, setAnswers] = useState(Array(exerciseData.length).fill(null));
+  const [submissions, setSubmissions] = useState(Array(exerciseData.length).fill(false));
+
+  const handleVideoAction = async () => {
+    console.log('Playing video with ID:', videoId);
+    setSelectedVideo(video.video_path);
+    dispatch(setVideoId(videoId));
+    console.log('Set videoId in Redux:', videoId);
+  
+    try {
+      console.log('Attempting to record watched video for ID:', videoId);
+      const videoDetails = await fetchVideoDetails(videoId);
+      const result = await recordWatchedVideo(videoId);
+      console.log('Video recorded successfully', result);
+  
+      await fetchHistoryVideos(); 
+    } catch (error) {
+      console.error('Error recording watched video:', error);
+    }
+  };
+
+  useEffect(() => {
+    handleVideoAction();
+  }, []);
 
     const handlePlaybackStatusUpdate = status => {
       if (status.isLoaded) {
         if (status.isBuffering !== isBuffering) {
           setIsBuffering(status.isBuffering);
         }
-  
         if (status.didJustFinish) {
           setSelectedVideo(null);
         }
@@ -61,19 +82,15 @@ const VideoPlayer = () => {
 
     useEffect(() => {
       if (route.params?.videoId) {
-        console.log('Playing video with ID:', route.params.videoId); // Debug log
+        console.log('Playing video with ID:', route.params.videoId); 
         dispatch(setVideoId(route.params.videoId));
-        console.log('Dispatched videoId to Redux:', route.params.videoId); // Debug log
+        console.log('Dispatched videoId to Redux:', route.params.videoId); 
       }
     }, [route.params?.videoId]);
 
-    const handleVideoPlay = (videoPath, videoId) => {
-      console.log('Playing video with ID:', videoId); // Debug log
-      setSelectedVideo(videoPath);
-      dispatch(setVideoId(videoId));
-      console.log('Set videoId in Redux:', videoId); // Debug log
-    };
-  
+
+
+
     const closeVideoPlayer = () => {
       setSelectedVideo(null);
     };
@@ -118,89 +135,147 @@ const VideoPlayer = () => {
     const currentExercise = exerciseData[currentQuestion];
     const progress = (currentQuestion + 1) / exerciseData.length;
 
+    const Like = async (videoid) => {
+      try {
+        const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/like`;
+        const body = new FormData();
+        body.append("course_id", videoid);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': "multipart/form-data;"
+          },
+          body : body
+        });
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+
+    const unLike = async (videoid) => {
+      try {
+        const url = `https://schools.fabulearn.net/api/bliss/videos/${videoid}/unlike`;
+        const body = new FormData();
+        body.append("course_id", videoid);
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': "multipart/form-data;"
+          },
+          body : body
+        });
+        const data = await response.json();
+        console.log(data);
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+  
+    const clickLike = (videoid) => {
+      console.log("clicked like button.");
+      if (isLiked) {
+        unLike(videoid);
+        setLikeNum((prev) => (prev !== null ? prev - 1 : 0)); 
+        setIsLiked(false);
+      } else {
+        Like(videoid);
+        setLikeNum((prev) => (prev !== null ? prev + 1 : 1)); 
+        setIsLiked(true);
+      }
+    };
+
+    const [likeNum, setLikeNum] = useState(null); 
+    const [isLiked, setIsLiked] = useState(false);
+    const [noteNum, setnoteNum] = useState();
+
+
+   
+
   return (
     <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.container1}>
-        <View style={styles.videoContainer}>    
-            <View style={styles.videotext}>
-            
-            <View style={styles.logoandtitle}>
-                <TouchableOpacity onPress={() => navigation.goBack()}>
-                    <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={30}/>  
-                </TouchableOpacity>
-                <View style={styles.logoContainer}>
-                  <Image source={{ uri: video.logo }} style={styles.logo} />
-                  <Text style={styles.logoTitle}>{video.logotitle}</Text>
-                </View>
-                <View style={styles.videoDetails}>
-                  <Text style={styles.videoTitle}>{video.title}</Text>
-                  <View style={styles.termsContainer}>
-                      {video.hashtag.map((term, index) => (
-                          <TouchableOpacity key={index} style={styles.term}>
-                              <Text style={styles.termText}>{term}</Text>
-                          </TouchableOpacity>
-                      ))}
-                  </View>
-                </View>
-            </View>
-            </View>
-
-            {/* Video Placeholder */}
-            <TouchableOpacity style={styles.thumbnail} onPress={() => handleVideoPlay(video.video_path, video.id)}>
-              
-              {selectedVideo === video.video_path ? (
-              <View style={styles.videoPlayerContainer}>
-                <Video
-                  ref={videoRef}
-                  source={{ uri: selectedVideo }}
-                  style={styles.videoPlayer}
-                  useNativeControls
-                  resizeMode="contain"
-                  onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
-                  onEnd={() => setSelectedVideo(null)}
-                />
-                {isBuffering && (
-                  <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#0000ff" />
-                  </View>
-                )}
-                <TouchableOpacity style={styles.closeButton} onPress={closeVideoPlayer}>
-                  <Text style={styles.closeButtonText}>X</Text>
-                </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.container1}>
+      <View style={styles.videoContainer}>    
+        <View style={styles.videotext}>
+          <View style={styles.logoandtitle}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                  <Octicons name="chevron-left" size={30} color="#00A3A3"  marginRight={30}/>  
+              </TouchableOpacity>
+              <View style={styles.logoContainer}>
+                <Image source={{ uri: video.logo }} style={styles.logo} />
+                <Text style={styles.logoTitle}>{video.logotitle}</Text>
               </View>
-            ) : (
-              <>
-                <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
-                <View style={styles.playButtonContainer}>
-                  <Image source={require('../pictures/Play Button.png')} style={styles.playButton} />
+              <View style={styles.videoDetails}>
+                <Text style={styles.videoTitle}>{video.title}</Text>
+                <View style={styles.termsContainer}>
+                    {video.hashtag.map((term, index) => (
+                        <TouchableOpacity key={index} style={styles.term}>
+                            <Text style={styles.termText}>{term}</Text>
+                        </TouchableOpacity>
+                    ))}
                 </View>
-              </>
+              </View>
+          </View>
+        </View>
+        <TouchableOpacity style={styles.thumbnail} onPress={handleVideoAction}>
+          {selectedVideo === video.video_path ? (
+          <View style={styles.videoPlayerContainer}>
+            <Video
+              ref={videoRef}
+              source={{ uri: selectedVideo }}
+              style={styles.videoPlayer}
+              useNativeControls
+              resizeMode="contain"
+              onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
+              onEnd={() => setSelectedVideo(null)}
+            />
+            {isBuffering && (
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
             )}
+            <TouchableOpacity style={styles.closeButton} onPress={closeVideoPlayer}>
+              <Text style={styles.closeButtonText}>X</Text>
             </TouchableOpacity>
-
-            <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>{video.likes} ♡ Like</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>{video.notes} ✎ 筆記</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>📑 推薦</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button}>
-                <Text style={styles.buttonText}>📥 推薦</Text>
-            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+            <View style={styles.playButtonContainer}>
+              <Image source={require('../pictures/Play Button.png')} style={styles.playButton} />
             </View>
+          </>
+        )}
+        </TouchableOpacity>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.button} onPress={()=>clickLike(videoId)}>
+              <Text style={styles.buttonnumText}>{likeNum !== null ? likeNum : ''}</Text>
+
+              {isLiked ?<Ionicons name="heart" size={20} color="#00A3A3"/>:
+              <Ionicons name="heart-outline" size={20} color="#00A3A3"/>
+            }
+              <Text style={styles.buttonText}>Like</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>{video.notes} ✎ 筆記</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>📑 推薦</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button}>
+              <Text style={styles.buttonText}>📥 推薦</Text>
+          </TouchableOpacity>
+        </View>
         </View>
         <View style={styles.exerciseContainer}>
-        <View style={styles.progressContainer}>
-          <Text style={styles.progressLabel}>練習</Text>
-          <View style={styles.progressBarBackground}>
-            <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+          <View style={styles.progressContainer}>
+            <Text style={styles.progressLabel}>練習</Text>
+              <View style={styles.progressBarBackground}>
+                <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
+              </View>
+            <Text style={styles.progressText}>{`${currentQuestion + 1}/${exerciseData.length}`}</Text>
           </View>
-          <Text style={styles.progressText}>{`${currentQuestion + 1}/${exerciseData.length}`}</Text>
-        </View>
         <View style={styles.exerciseItem}>
           <Text style={styles.exerciseQuestion}>{currentExercise.question}</Text>
           {currentExercise.options.map((option, index) => {
@@ -248,8 +323,8 @@ const VideoPlayer = () => {
         </View>
       </View>
         
-        </ScrollView>
-        <BottomNavBar/>
+      </ScrollView>
+      <BottomNavBar/>
     </View>
   );
 };
@@ -261,7 +336,6 @@ const styles = StyleSheet.create({
   },
   container1: {
     paddingBottom: 140,
-    
   },
   videoContainer: {
     padding: 16,
@@ -271,7 +345,7 @@ const styles = StyleSheet.create({
   thumbnail: {
     width: '100%',
     height: 200,
-    backgroundColor: 'grey', // Placeholder for video
+    backgroundColor: 'grey', 
     borderRadius: 10,
     marginBottom: 16,
   },
@@ -304,38 +378,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 10,
-    marginRight: 10, // Added margin to push the logo and title closer
+    marginRight: 10,
   },
   logo: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: 'lightgrey', // Placeholder for logo
+    backgroundColor: 'lightgrey', 
   },
   logoTitle: {
     fontSize: 11,
     fontWeight: 'bold',
     marginTop: 5,
-    
   },
-
   videoDetails: {
     width: '80%'
   },
-  
   videoTitle: {
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
     marginLeft: 10,
-    
   },
   termsContainer: {
     flexDirection: 'row',
     marginTop: 10,
     flexWrap: 'wrap',
     maxWidth: '90%', 
-    
   },
   term: {
     paddingHorizontal: 10,
@@ -381,7 +450,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#e0f7fa',
     borderRadius: 10,
     padding: 5,
-    marginHorizontal: 5,
+    marginHorizontal: 10,
+    flexDirection:'row',
+  },
+  buttonnumText: {
+    color: "#00A3A3",
+    fontSize: 14,
+    marginRight: 5,
   },
   buttonText: {
     color: '#00A3A3',
@@ -393,7 +468,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 40,
     backgroundColor:'#fffcec',
     marginTop: -30,
-    
   },
   progressContainer: {
     flexDirection: 'row',

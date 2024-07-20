@@ -11,6 +11,8 @@ import VideoStack from './VideoStack';
 import Notification from './Notifications';
 import AccountStack from './AccountStack';
 import ChallengeStack from './ChallengeStack';
+import { VideoProvider } from './VideoContext'; 
+
 
 
 const MainStack = createNativeStackNavigator();
@@ -18,14 +20,16 @@ const MainStack = createNativeStackNavigator();
 export default function Index() {
   return (
     <Provider store={store}>
-      <MainStack.Navigator screenOptions={{ headerShown: false }}>
-      <MainStack.Screen name="HomeScreen" component={HomeScreen} />
-      <MainStack.Screen name="VideoStack" component={VideoStack} />
-      <MainStack.Screen name="StudyPackageStack" component={StudyPackageStack} />
-      <MainStack.Screen name="Notification" component={Notification} />
-      <MainStack.Screen name="AccountStack" component={AccountStack} />
-      <MainStack.Screen name="ChallengeStack" component={ChallengeStack} />
-      </MainStack.Navigator>
+      <VideoProvider>
+        <MainStack.Navigator screenOptions={{ headerShown: false }}>
+          <MainStack.Screen name="HomeScreen" component={HomeScreen} />
+          <MainStack.Screen name="VideoStack" component={VideoStack} />
+          <MainStack.Screen name="StudyPackageStack" component={StudyPackageStack} />
+          <MainStack.Screen name="Notification" component={Notification} />
+          <MainStack.Screen name="AccountStack" component={AccountStack} />
+          <MainStack.Screen name="ChallengeStack" component={ChallengeStack} />
+        </MainStack.Navigator>
+      </VideoProvider>
     </Provider>
   );
 }

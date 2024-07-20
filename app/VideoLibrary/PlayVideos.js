@@ -42,6 +42,7 @@ function PlayVideos({route}) {
   const [isEdit, setIsEdit] = useState(false);
   const [currentItem, setCurrentItem] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  
 
   async function getStoredTabID() {
     try{
@@ -203,6 +204,7 @@ const subjectinchinese = {
       const response = await fetch(url);
       const data = await response.json();
       await setFeaturedVideodetails(data.data);
+      console.log('DATA',featuredVideodetails)
       await setlikeNum(data.data.like_count);
       await setIsLiked(data.data.is_liked);
       await console.log("featuredvideodetails: ",featuredVideodetails)

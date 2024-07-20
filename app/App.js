@@ -12,7 +12,9 @@ import StartChallenge from './Challenge/StartChallenge1';
 import AccountStack from './AccountStack';
 import StudyPackageStack from './StudyPackageStack';
 import Notification from './Notifications';
-import * as SecureStore from 'expo-secure-store';
+import WatchedVideosAPI from './WatchedVideosAPI';
+import { WatchedVideosProvider} from './VideoContext';
+
 
 const Stack = createNativeStackNavigator();
 
@@ -24,20 +26,22 @@ const App = () => {
 
   
   return (
-    <NavigationContainer>
-      <Header />
-      
-      <Stack.Navigator initialRouteName={initalroute}>
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Challenge" component={ChallengeScreen} />
-        <Stack.Screen name="VideoStack" component={VideoStack} />
-        <Stack.Screen name="StartChallenge" component={StartChallenge} />
-        <Stack.Screen name="AccountStack" component={AccountStack} />
-        <Stack.Screen name="StudyPackageStack" component={StudyPackageStack} />
-        <Stack.Screen name="Notification" component={Notification} />
-      </Stack.Navigator>
-      <BottomNavBar />
-    </NavigationContainer>
+    <WatchedVideosProvider>
+      <NavigationContainer>
+        <Header />
+        <Stack.Navigator initialRouteName={initalroute}>
+          <Stack.Screen name="Home" component={HomeScreen} />
+          <Stack.Screen name="Challenge" component={ChallengeScreen} />
+          <Stack.Screen name="VideoStack" component={VideoStack} />
+          <Stack.Screen name="StartChallenge" component={StartChallenge} />
+          <Stack.Screen name="AccountStack" component={AccountStack} />
+          <Stack.Screen name="StudyPackageStack" component={StudyPackageStack} />
+          <Stack.Screen name="Notification" component={Notification} />
+          <Stack.Screen name="WatchedVideosAPI" component={WatchedVideosAPI} />
+        </Stack.Navigator>
+        <BottomNavBar />
+      </NavigationContainer>
+    </WatchedVideosProvider>
   );
 };
 

@@ -1,7 +1,6 @@
 // ChallengeStack.js
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-
 import { createStackNavigator } from '@react-navigation/stack';
 import ChallengeScreen from './Challenge/ChallengeScreen'; 
 import StartChallenge from './Challenge/StartChallenge';
@@ -27,7 +26,6 @@ const SettingStack = createNativeStackNavigator();
 
 function ChallengeStack() {
   return (
-    
       <MainStack.Navigator initialRouteName="ChallengeScreen" screenOptions={{headerShown:false}}>
         <MainStack.Screen name="ChallengeScreen" component={ChallengeScreen} />
         <MainStack.Screen name="StartChallenge0" component={StartChallenge0} />

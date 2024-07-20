@@ -10,11 +10,11 @@ const MainComponent = () => {
 
     const navigation = useNavigation();
     const pieData = [
-        { key: 1, value: 25, svg: { fill: '#00A3A3' }, label: '50%' },
-        { key: 2, value: 15, svg: { fill: '#FF6F61' }, label: '30%' },
-        { key: 3, value: 10, svg: { fill: '#FFD700' }, label: '20%' },
-      ];
-
+      { key: 1, value: 25, svg: { fill: '#00A3A3' }, label: '50%' },
+      { key: 2, value: 15, svg: { fill: '#FF6F61' }, label: '30%' },
+      { key: 3, value: 10, svg: { fill: '#FFD700' }, label: '20%' },
+    ];
+    
 
     const dailyData = [
         { date: '21/5', count: 20 },

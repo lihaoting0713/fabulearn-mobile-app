@@ -1,4 +1,4 @@
-import { StatusBar } from "expo-status-bar";
+//StudyPackage.js
 import {
   StyleSheet,
   Text,
@@ -15,10 +15,9 @@ import {
 import { Ionicons,Octicons } from "@expo/vector-icons";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigation, useRoute } from '@react-navigation/native';
-import BottomNavBar from '../components/BottomNavBar'; // Import the BottomNavBar component
+import BottomNavBar from '../components/BottomNavBar'; 
 import axios from 'axios';
 import { SvgUri } from "react-native-svg";
-
 
 function StudyPackage() {
   const navigation = useNavigation();
@@ -33,200 +32,203 @@ function StudyPackage() {
     totalVideos: 0,
     completedExercises: 0,
     totalExercises: 0,
-});
-const [loading, setLoading] = useState(false);
-
-const subjectList = [
-  { text: "中文", id: "subject1", icon: "https://jcblendedlearning.fabulearn.net/assets/chinese.48cf33b0.svg", subject: "Chinese" },
-  { text: "英文", id: "subject2", icon: "https://jcblendedlearning.fabulearn.net/assets/english.0ba40afe.svg", subject: "English" },
-  { text: "數學", id: "subject3", icon: "https://jcblendedlearning.fabulearn.net/assets/math.592e35ec.svg", subject: "Math" },
-  { text: "科學", id: "subject4", icon: "https://jcblendedlearning.fabulearn.net/assets/science.11cdf6e6.svg", subject: "Science" },
-  { text: "共通能力", id: "subject5", icon: "https://jcblendedlearning.fabulearn.net/assets/other.4dfe6be8.svg", subject: "Other" },
-];
+  });
+  const [loading, setLoading] = useState(false);
+  
+  const subjectList = [
+    { text: "中文", id: "subject1", icon: "https://jcblendedlearning.fabulearn.net/assets/chinese.48cf33b0.svg", subject: "Chinese" },
+    { text: "英文", id: "subject2", icon: "https://jcblendedlearning.fabulearn.net/assets/english.0ba40afe.svg", subject: "English" },
+    { text: "數學", id: "subject3", icon: "https://jcblendedlearning.fabulearn.net/assets/math.592e35ec.svg", subject: "Math" },
+    { text: "科學", id: "subject4", icon: "https://jcblendedlearning.fabulearn.net/assets/science.11cdf6e6.svg", subject: "Science" },
+    { text: "共通能力", id: "subject5", icon: "https://jcblendedlearning.fabulearn.net/assets/other.4dfe6be8.svg", subject: "Other" },
+  ];
 
   const fetchTopics = async () => {
     setLoading(true);
     try {
-        const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
-        console.log('Making request to:', url);
-        const response = await axios.get(url);
-        const data = response.data;
+      const url = `https://schools.fabulearn.net/api/bliss/learning-packages`;
+      console.log('Making request to:', url);
+      const response = await axios.get(url);
+      const data = response.data;
 
-        if (data.success) {
-          const items = Object.values(data.data).filter(item => item.subject && item.subject.toLowerCase() === currentSubject.toLowerCase());
-          const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
-          setTopics(uniqueTopics);
-          setOriginalTopics(uniqueTopics); 
+      if (data.success) {
+        const items = Object.values(data.data).filter(item => item.subject && item.subject.toLowerCase() === currentSubject.toLowerCase());
+        const uniqueTopics = [...new Map(items.map(item => [item.topic, item])).values()];
+        setTopics(uniqueTopics);
+        setOriginalTopics(uniqueTopics); 
 
-            // Calculate totals
-            const totals = items.reduce(
-                (acc, item) => {
-                    acc.watchedVideos += item.number_of_watched_videos;
-                    acc.totalVideos += item.total_number_of_videos;
-                    acc.completedExercises += item.number_of_completed_exercises;
-                    acc.totalExercises += item.total_number_of_exercises;
-                    return acc;
-                },
-                { watchedVideos: 0, totalVideos: 0, completedExercises: 0, totalExercises: 0 }
-            );
-            setTotals(totals);
-        } else {
-            console.error('Failed to fetch video data:', data);
-        }
+        const totals = items.reduce(
+          (acc, item) => {
+              acc.watchedVideos += item.number_of_watched_videos;
+              acc.totalVideos += item.total_number_of_videos;
+              acc.completedExercises += item.number_of_completed_exercises;
+              acc.totalExercises += item.total_number_of_exercises;
+              return acc;
+          },
+          { watchedVideos: 0, totalVideos: 0, completedExercises: 0, totalExercises: 0 }
+        );
+          setTotals(totals);
+      } else {
+        console.error('Failed to fetch video data:', data);
+      }
     } catch (error) {
         console.error('Error fetching video data:', error.message);
         if (error.response) {
-            console.error('Error response data:', error.response.data);
-        }
+          console.error('Error response data:', error.response.data);
+      }
     } finally {
-      setLoading(false);  // Stop loading
+      setLoading(false);  
     }
-};
+  };
 
-useEffect(() => {
-  fetchTopics();
-}, [currentSubject]);
+  useEffect(() => {
+    fetchTopics();
+  }, [currentSubject]);
 
-const handleNavigation = (subject) => {
-  setCurrentSubject(subject);
-}
-
-
-const filterAndSortTopics = (topics, searchText) => {
-  let filteredTopics = topics;
-
-  if (searchText) {
-    filteredTopics = filteredTopics.filter(item => item.topic.toLowerCase().includes(searchText.toLowerCase()));
+  const handleNavigation = (subject) => {
+    setCurrentSubject(subject);
   }
 
-  return filteredTopics;
-};
+  const filterAndSortTopics = (topics, searchText) => {
+    let filteredTopics = topics;
 
-const handleSearch = () => {
-  const filteredTopics = filterAndSortTopics(originalTopics, searchText);
-  setTopics(filteredTopics);
-};
+    if (searchText) {
+      filteredTopics = filteredTopics.filter(item => item.topic.toLowerCase().includes(searchText.toLowerCase()));
+    }
 
-const handleSearchTextChange = useCallback((text) => {
-  setSearchText(text);
-  if (!text) {
-    setTopics(originalTopics);
-  }
-}, [originalTopics]);
+    return filteredTopics;
+  };
 
- 
+  const handleSearch = () => {
+    const filteredTopics = filterAndSortTopics(originalTopics, searchText);
+    setTopics(filteredTopics);
+  };
 
- 
- 
+  const handleSearchTextChange = useCallback((text) => {
+    setSearchText(text);
+    if (!text) {
+      setTopics(originalTopics);
+    }
+  }, [originalTopics]);
+
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollViewContent}>
-
       <View style={styles.top}>
-            {showSearchBar ? (
-              <View style={styles.searchBarContainer}>
-                <TouchableOpacity onPress={() => setShowSearchBar(false)}>
-                  <Octicons name="chevron-left" size={30} color="#00A3A3" marginRight={10} />
-                </TouchableOpacity>
-                <TextInput
-                  style={styles.searchBar}
-                  placeholder="Search"
-                  placeholderTextColor="#999999"
-                  value={searchText}
-                  onChangeText={handleSearchTextChange}
-                  onSubmitEditing={handleSearch}
-                />
-              </View>
-            ) : (
-              <>
-                <Ionicons name="search" size={30} style={{ opacity: 0 }} />
-
-                <View style={styles.titleContainer}>
-                  <Text style={styles.title}>學習包</Text>
-                </View>
-                <View style={styles.iconsContainer}>
-                  <TouchableOpacity
-                    onPress={() => setShowSearchBar(true)}
-                    style={styles.searchIcon}
-                  >
-                    <Ionicons name="search" size={30} color="#00A3A3" />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setsearchfilterVisible(true)}>
-                  </TouchableOpacity>
-                </View>
-              </>
-            )}
-          </View>
-
-
-        <View style={styles.subjectContainer}>
-          <ScrollView
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.subjectContent}
-          >
-            <View style={styles.subject}>
-              <View style={styles.subjectItemContainer}>
-                <FlatList
-                  data={subjectList}
-                  keyExtractor={(item) => item.id}
-                  renderItem={({ item }) => (
-                    <View style={styles.subjectItem}>
-                      <TouchableOpacity onPress={() => handleNavigation(item.subject)}>
-                        <View style={[styles.circle, currentSubject === item.subject && styles.selectedCircle]}>
-                          <SvgUri width="100%" height="100%" uri={item.icon} />
-                        </View>
-                      </TouchableOpacity>
-                      <Text style={styles.subjectText}>{item.text}</Text>
-                    </View>
-                  )}
-                  horizontal
-                  scrollEnabled={false}
-                  showsHorizontalScrollIndicator={false}
-                />
-              </View>
-            </View>
-          </ScrollView>
-        </View>
-       
-        {loading ? (
-      <ActivityIndicator size="large" color="#00A3A3" style={styles.loadingIndicator} />
-    ) : (
-      <View>
-        <View style={styles.progressContainer}>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>已觀看影片</Text>
-            <Text style={styles.statValue}>{totals.watchedVideos}/{totals.totalVideos}</Text>
-          </View>
-          <View style={styles.statItem}>
-            <Text style={styles.statLabel}>已完成練習</Text>
-            <Text style={styles.statValue}>{totals.completedExercises}/{totals.totalExercises}</Text>
-          </View>
-          <Text style={styles.detailLink}>詳情</Text>
-        </View>
-
-        <View>
-          {topics.map((item) => (
-            <TouchableOpacity
-              key={item.id}
-              style={styles.workContainer}
-              onPress={() => navigation.navigate('Topics', { topic: item.topic })}
-            >
-              <View style={styles.workItem}>
-                <Image
-                  style={styles.workIcon}
-                  source={{ uri: item.thumbnail }}
-                />
-                <Text style={styles.workLabel}>
-                  {item.topic}
-                </Text>
-              </View>
+        {showSearchBar ? (
+          <View style={styles.searchBarContainer}>
+            <TouchableOpacity onPress={() => setShowSearchBar(false)}>
+              <Octicons name="chevron-left" size={30} color="#00A3A3" marginRight={10} />
             </TouchableOpacity>
-          ))}
-        </View>
+            <TextInput
+              style={styles.searchBar}
+              placeholder="Search"
+              placeholderTextColor="#999999"
+              value={searchText}
+              onChangeText={handleSearchTextChange}
+              onSubmitEditing={handleSearch}
+            />
+          </View>
+        ) : (
+          <>
+            <Ionicons name="search" size={30} style={{ opacity: 0 }} />
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>學習包</Text>
+            </View>
+            <View style={styles.iconsContainer}>
+              <TouchableOpacity
+                onPress={() => setShowSearchBar(true)}
+                style={styles.searchIcon}
+              >
+                <Ionicons name="search" size={30} color="#00A3A3" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setsearchfilterVisible(true)}>
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
       </View>
-    )}
+
+      <View style={styles.subjectContainer}>
+        <ScrollView
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.subjectContent}
+        >
+          <View style={styles.subject}>
+            <View style={styles.subjectItemContainer}>
+              <FlatList
+                data={subjectList}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <View style={styles.subjectItem}>
+                    <TouchableOpacity onPress={() => handleNavigation(item.subject)}>
+                      <View style={[styles.circle, currentSubject === item.subject && styles.selectedCircle]}>
+                        <SvgUri width="100%" height="100%" uri={item.icon} />
+                      </View>
+                    </TouchableOpacity>
+                    <Text style={styles.subjectText}>{item.text}</Text>
+                  </View>
+                )}
+                horizontal
+                scrollEnabled={false}
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+       
+      {loading ? (
+        <View>
+          <View style={styles.progressContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>已觀看影片</Text>
+              <ActivityIndicator size="large" color="#00A3A3" style={styles.loadingIndicatorStatLabel} />
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>已完成練習</Text>
+              <ActivityIndicator size="large" color="#00A3A3" style={styles.loadingIndicatorStatLabel} />
+            </View>
+            <Text style={styles.detailLink}>詳情</Text>
+          </View>
+          <ActivityIndicator size="large" color="#00A3A3" style={styles.loadingIndicator} />
+        </View>
+      ) : (
+        <View>
+          <View style={styles.progressContainer}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>已觀看影片</Text>
+              <Text style={styles.statValue}>{totals.watchedVideos}/{totals.totalVideos}</Text>
+            </View>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>已完成練習</Text>
+              <Text style={styles.statValue}>{totals.completedExercises}/{totals.totalExercises}</Text>
+            </View>
+            <Text style={styles.detailLink}>詳情</Text>
+          </View>
+          <View>
+            {topics.map((item) => (
+              <TouchableOpacity
+                key={item.id}
+                style={styles.workContainer}
+                onPress={() => navigation.navigate('Topics', { topic: item.topic })}
+              >
+                <View style={styles.workItem}>
+                  <Image
+                    style={styles.workIcon}
+                    source={{ uri: item.thumbnail }}
+                  />
+                  <Text style={styles.workLabel}>
+                    {item.topic}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+      )}
       </ScrollView>
       <BottomNavBar/>
     </View>
@@ -237,7 +239,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
   scrollViewContent: {
   },
   top: {
@@ -313,14 +314,13 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   selectedCircle: {
-    borderColor: 'red', // or any color to highlight
+    borderColor: 'red', 
     borderWidth: 4,
   },
   subjectText: {
-    // Your styles here
   },
   selectedText: {
-    color: 'blue', // or any color to highlight
+    color: 'blue', 
   },
   subjectText: {
     marginTop: 5,
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     width: 350,
     height: 200,
     marginHorizontal: 10,
-    backgroundColor: "grey", // Placeholder for thumbnail
+    backgroundColor: "grey", 
     borderRadius: 25,
     borderColor: "#D3D3D3",
     borderWidth: 3,
@@ -358,13 +358,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 10,
-    marginRight: 10, // Added margin to push the logo and title closer
+    marginRight: 10, 
   },
   logo: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: "lightgrey", // Placeholder for logo
+    backgroundColor: "lightgrey", 
   },
   logoTitle: {
     fontSize: 11,
@@ -455,63 +455,61 @@ const styles = StyleSheet.create({
   },
   statItem: {
     alignItems: 'flex-start',
-},
-statLabel: {
+  },
+  statLabel: {
     fontSize: 14,
     color: '#ffffff',
-},
-statValue: {
+  },
+  statValue: {
     fontSize: 24,
     color: '#ffffff',
     fontWeight: 'bold',
-},
-detailLink: {
+  },
+  detailLink: {
     fontSize: 14,
     color: '#ffffff',
-},
-workContainer:{
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  backgroundColor: '#fffcec',
-  padding: 20,
-  borderRadius: 10,
-  
-  margin: 15,
-},
-
-workItem: {
-  flexDirection:'row',
-  alignItems: 'center',
-},
-workIcon: {
+  },
+  workContainer:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fffcec',
+    padding: 20,
+    borderRadius: 10,
+    margin: 15,
+  },
+  workItem: {
+    flexDirection:'row',
+    alignItems: 'center',
+  },
+  workIcon: {
     width: 40,
     height: 40,
-},
-workLabel: {
+  },
+  workLabel: {
     fontSize: 20,
     color: '#47c3c3',
     fontWeight:'bold',
     padding: 10,
     marginLeft: 10,
-},
-workContainerLast:{
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  backgroundColor: '#fffcec',
-  padding: 20,
-  borderRadius: 10,
-  height: '22%',
-  margin: 15,
-  marginBottom:200,
-},
+  },
+  workContainerLast:{
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#fffcec',
+    padding: 20,
+    borderRadius: 10,
+    height: '22%',
+    margin: 15,
+    marginBottom:200,
+  },
   loadingIndicator: {
     marginTop: 20,
   },
- 
-
-
+  loadingIndicatorStatLabel: {
+    margin:5,
+  }
 });
 
 export default StudyPackage;

@@ -1,67 +1,41 @@
-import React, { useState, useEffect, useRef, useCallback, useContext } from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity, SafeAreaView, Dimensions, ActivityIndicator} from 'react-native';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback } from 'react';
+import { 
+  StyleSheet, 
+  View, 
+  Text, 
+  Image, 
+  ScrollView, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  Dimensions,
+  ActivityIndicator 
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Header from './components/Header';
-import { Video } from 'expo-av';
 import BottomNavBar from './components/BottomNavBar'; 
 import axios from 'axios'; 
-import { useSelector, useDispatch } from 'react-redux';
-
+import { useSelector } from 'react-redux';
+import { useVideoContext } from './VideoContext';
 
 const HomeScreen = () => {
-  
-
   const [activePage, setActivePage] = useState('系統挑戰'); 
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [watchRecommendVideos, setWatchRecommendVideos] = useState([]);
-  const [watchHistoryVideos, setWatchHistoryVideos] = useState([]);
-  const [learnvideolist, setLearnvideolist] = useState([]);
-  const [isBuffering, setIsBuffering] = useState(false);
+  const [loading, setLoading] = useState([]);
   const navigation = useNavigation();
-  const videoRef = useRef(null);
-  const route = useRoute();
   const videoId = useSelector((state) => state.video.videoId);
+  const { watchHistoryVideos, fetchHistoryVideos } = useVideoContext();
+ 
   
   const fetchRecVideos = useCallback(async (videoId) => {
     try {
       const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/recommendation`;
-      console.log('Making request to:', url); // Debug log
+      console.log('Making request to:', url); 
       const response = await axios.get(url);
       const data = response.data;
 
       if (data.success) {
-        console.log('Fetched videos:', data.data.recommendation); // Debug log
-        const videos = Object.values(data.data.recommendation);
-        setWatchHistoryVideos(videos);
-      } else {
-        console.error('Failed to fetch video data:', data);
-      }
-    } catch (error) {
-      console.error('Error fetching video data:', error.message);
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    console.log('Current videoId from context in HomeScreen:', videoId); // Debug log
-    if (videoId) {
-      fetchRecVideos(videoId);
-    }
-  }, [videoId, fetchRecVideos]);
-
-
-
-  const fetchHistoryVideos = useCallback(async (videoId) => {
-    try {
-      const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/recommendation`;
-      console.log('Making request to:', url); // Debug log
-      const response = await axios.get(url);
-      const data = response.data;
-
-      if (data.success) {
-        console.log('Fetched videos:', data.data.recommendation); // Debug log
+        console.log('Fetched videos:', data.data.recommendation); 
         const videos = Object.values(data.data.recommendation);
         setWatchRecommendVideos(videos);
       } else {
@@ -76,29 +50,26 @@ const HomeScreen = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Current videoId from context in HomeScreen:', videoId); // Debug log
+    console.log('Current videoId from context in HomeScreen:', videoId); 
     if (videoId) {
-      fetchHistoryVideos(videoId);
+      fetchRecVideos(videoId);
     }
-  }, [videoId, fetchHistoryVideos]);
+  }, [videoId, fetchRecVideos]);
 
-
-
-
+   useEffect(() => {
+    fetchHistoryVideos();
+  }, [fetchHistoryVideos]);
 
   const handleVideoPress = (video) => {
-    // Navigate to the VideoVideo screen
     navigation.navigate('HomeVideo', {video});
   };
 
-    
   return (
     <SafeAreaView style={[styles.container, activePage === '系統挑戰' ? styles.container : styles.containerBlue]}>
       <ScrollView style={styles.content}>
       <Header />
-      
-      {activePage === '系統挑戰' ? (
-          <View style={styles.container00}>
+        {activePage === '系統挑戰' ? (
+        <View style={styles.container00}>
           <View style={styles.container1}>
             <View style={styles.challengebuttons}>
               <TouchableOpacity 
@@ -120,31 +91,28 @@ const HomeScreen = () => {
           </View>
         </View>
         ) : (
-          <View style={styles.container01}>
-            <View style={styles.container1}>
-              <View style={styles.challengebuttons}>
-                <TouchableOpacity 
-                  style={[styles.navButton1, activePage === '系統挑戰' ? styles.activeButton : styles.inactiveButton]}
-                  onPress={() => setActivePage('系統挑戰')}
-                >
-                  <Text style={[styles.navText1, activePage === '系統挑戰' ? styles.activeText : styles.inactiveText]}>系統挑戰</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                  style={[styles.navButton2, activePage === '用戶挑戰' ? styles.activeButton : styles.inactiveButton]}
-                  onPress={() => setActivePage('用戶挑戰')}
-                >
-                  <Text style={[styles.navText2, activePage === '用戶挑戰' ? styles.activeText : styles.inactiveText]}>用戶挑戰</Text>
-                </TouchableOpacity>
-              </View>
+        <View style={styles.container01}>
+          <View style={styles.container1}>
+            <View style={styles.challengebuttons}>
+              <TouchableOpacity 
+                style={[styles.navButton1, activePage === '系統挑戰' ? styles.activeButton : styles.inactiveButton]}
+                onPress={() => setActivePage('系統挑戰')}
+              >
+                <Text style={[styles.navText1, activePage === '系統挑戰' ? styles.activeText : styles.inactiveText]}>系統挑戰</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.navButton2, activePage === '用戶挑戰' ? styles.activeButton : styles.inactiveButton]}
+                onPress={() => setActivePage('用戶挑戰')}
+              >
+                <Text style={[styles.navText2, activePage === '用戶挑戰' ? styles.activeText : styles.inactiveText]}>用戶挑戰</Text>
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity style={styles.detailsButton1}>
               <Text style={styles.detailsButtonText}>詳情</Text>
             </TouchableOpacity>
           </View>
         </View>
         )}
-        
-
-
         <View style={styles.container2}>
           <View style={styles.watchHistory}>
             <Text style={styles.watchHistoryText}>觀看記錄</Text>
@@ -152,7 +120,7 @@ const HomeScreen = () => {
           <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
             {watchHistoryVideos.map((video, index) => (
               <View key={index} style={styles.videoContainer}>
-                <TouchableOpacity style={styles.videoThumbnail} onPress={() => setSelectedVideo(video.video_path)}>
+                <TouchableOpacity style={styles.videoThumbnail} onPress={() => handleVideoPress(video)}>
                   <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
                   <View style={styles.playButtonContainer}>
                     <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
@@ -162,9 +130,9 @@ const HomeScreen = () => {
                 <Text style={styles.videoText}>{video.title}</Text>
                 <View style={styles.termsContainer}>
                   {video.hashtag.map((term, index) => (
-                      <TouchableOpacity key={index} style={styles.term}>
-                          <Text style={styles.termText}>{term}</Text>
-                      </TouchableOpacity>
+                    <TouchableOpacity key={index} style={styles.term}>
+                      <Text style={styles.termText}>{term}</Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -172,37 +140,33 @@ const HomeScreen = () => {
             ))}
           </ScrollView>
         </View>
-
-       
-
         <View style={styles.container3}>
           <View style = {styles.watchHistory}>
-              <Text style = {styles.watchHistoryText}>推薦影片</Text>
-            </View>
-            <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
+            <Text style = {styles.watchHistoryText}>推薦影片</Text>
+          </View>
+          <ScrollView horizontal={true} style={styles.videoScrollView} showsHorizontalScrollIndicator={false}>
             {watchRecommendVideos.map((video, index) => (
               <View key={index} style={styles.videoContainer}>
                 <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
-                    <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
-                    <View style={styles.playButtonContainer}>
-                      <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
-                    </View>
+                  <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                  <View style={styles.playButtonContainer}>
+                    <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
+                  </View>
                 </TouchableOpacity>
                 <View style={styles.videoDetails}>
                   <Text style={styles.videoText}>{video.title}</Text>
                   <View style={styles.termsContainer}>
                     {video.hashtag.map((term, index) => (
-                        <TouchableOpacity key={index} style={styles.term}>
-                            <Text style={styles.termText}>{term}</Text>
-                        </TouchableOpacity>
+                      <TouchableOpacity key={index} style={styles.term}>
+                          <Text style={styles.termText}>{term}</Text>
+                      </TouchableOpacity>
                     ))}
                   </View>
               </View>
               </View>
             ))}
-            </ScrollView>
+          </ScrollView>
         </View>
-
         <View style={styles.container4}>
           <View style = {styles.watchHistory}>
             <Text style = {styles.watchHistoryText}>推薦影片</Text>
@@ -211,18 +175,18 @@ const HomeScreen = () => {
           {watchRecommendVideos.map((video, index) => (
             <View key={index} style={styles.videoContainer}>
               <TouchableOpacity style={styles.videoThumbnail} onPress={()=>handleVideoPress(video)}>      
-                  <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
-                  <View style={styles.playButtonContainer}>
-                    <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
-                  </View>
+                <Image source={{ uri: video.thumbnail }} style={styles.thumbnailImage} />
+                <View style={styles.playButtonContainer}>
+                  <Image source={require('./pictures/Play Button.png')} style={styles.playButton} />
+                </View>
               </TouchableOpacity>
               <View style={styles.videoDetails}>
                 <Text style={styles.videoText}>{video.title}</Text>
                 <View style={styles.termsContainer}>
                   {video.hashtag.map((term, index) => (
-                      <TouchableOpacity key={index} style={styles.term}>
-                          <Text style={styles.termText}>{term}</Text>
-                      </TouchableOpacity>
+                    <TouchableOpacity key={index} style={styles.term}>
+                      <Text style={styles.termText}>{term}</Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
               </View>
@@ -230,14 +194,9 @@ const HomeScreen = () => {
           ))}
           </ScrollView>
         </View>
-
       </ScrollView>
-
       <BottomNavBar />
-      
     </SafeAreaView>
-
-      
   );
 };
 
@@ -250,27 +209,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f05c5c',
     justifyContent: 'flex-end',
-
   },
   containerBlue: {
     flex: 1,
     backgroundColor: '#e0ecec',
   },
-
   container00: {
     backgroundColor: '#f05c5c',
     paddingBottom:'20%',
   },
-
   container01: {
     backgroundColor: '#e0ecec',
     paddingBottom:'20%',
   },
-
   container1: {
     alignItems: 'center',
   },
-
   challengebuttons:{
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -281,24 +235,20 @@ const styles = StyleSheet.create({
     marginTop: '10%',
     borderRadius: 20, 
   },
-
   content: {
-    flex: 1,  // Makes sure that the content can expand and push the navigation to the bottom
+    flex: 1,  
   },
-
   navButton1: {
-    flex: 1, // Take up an equal portion of the container
+    flex: 1, 
     alignItems: 'center',
     justifyContent: 'center',
     padding: 13,
     backgroundColor: '#48bcbc', 
-    borderTopLeftRadius: 20, // Modify challengebuttons accordingly
+    borderTopLeftRadius: 20, 
     borderBottomLeftRadius: 20, 
-    
   },
-
   navButton2: {
-    flex: 1, // Take up an equal portion of the container
+    flex: 1, 
     alignItems: 'center',
     justifyContent: 'center',
     padding: 13,
@@ -307,40 +257,32 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20, 
     borderBottomRightRadius: 20, 
   },
-
   activeButton: {
-    backgroundColor: '#48bcbc', // Blue color for the active button
+    backgroundColor: '#48bcbc', 
     borderColor: 'transparent',
   },
-
   inactiveButton: {
     backgroundColor: 'white',
   },
-
   navText1: {
     fontSize: 15,
     color: '#f0fcfc',
     fontWeight: 'bold',
   },
-
   navText2: {
     fontSize: 15,
     color: '#48bcbc',
     fontWeight: 'bold',
   },
-
   activeText: {
-    color: 'white',  // White color for active button text
+    color: 'white',  
   },
-
   inactiveText: {
-    color: '#48bcbc',  // Blue color for inactive button text
+    color: '#48bcbc',  
   },
-
   container5: {
     alignItems: 'center',
   },
-
   bottomNav: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -352,15 +294,12 @@ const styles = StyleSheet.create({
     paddingTop: 0,
     zIndex: 1,   
   },
-
   challengeButtonContainer: {
-    alignSelf: 'center', // Centers the button horizontally
+    alignSelf: 'center', 
     justifyContent: 'center',
     alignItems: 'center',
-    top: -15, // Adjusts the button to protrude upwards from the nav bar
+    top: -15, 
   },
-
-
   navButtonLarge: {
     backgroundColor: '#ffbc04',
     borderRadius: 50,
@@ -368,86 +307,69 @@ const styles = StyleSheet.create({
     height: 97,
     justifyContent: 'center',
     alignItems: 'center',  
-   
   },
-
   curveSvg: {
     position: 'absolute',
     width: '50%',
     height: 125, 
     bottom: 60, 
-    
   },
-
   navText: {
     fontSize: 15,
     color: 'white',
     fontWeight: 'bold',
   },
-  
   navTextLarge: {
     fontSize: 16,
     color: 'white',
     fontWeight: 'bold',
   },
-
   detailsButton: {
     backgroundColor: '#f8c42c',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 13,
     marginTop: '87%',
-    borderRadius: 25, // Rounded corners
+    borderRadius: 25, 
     width: '25%',
   },
-
   detailsButton1: {
     backgroundColor: '#48bcbc',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 13,
     marginTop: '87%',
-    borderRadius: 25, // Rounded corners
+    borderRadius: 25, 
     width: '25%',
   },
-
   detailsButtonText: {
-    color: 'white', // White text
+    color: 'white', 
     fontSize: 16,
     fontWeight: 'bold',
   },
-
   container2: {
     backgroundColor: '#fffcec',
     paddingTop: '5%',
     paddingBottom: '5%',
     borderTopLeftRadius: 25, 
   },
-
   watchHistory: {
     marginLeft: '5%',
     marginTop: '5%',
   },
-
   watchHistoryText: {
     fontSize: 17,
     fontWeight: 'bold',
   },
-
-
-  
   videoScrollView: {
     marginTop: '5%',
     marginLeft: '5%',
   },
-
   videoContainer: {
     width: 220,
     alignItems: 'center',
     flexDirection:'column',
-    
   },
-
   videoThumbnail: {
     width: 200,
     height: 120,
@@ -475,7 +397,6 @@ const styles = StyleSheet.create({
   videoDetails: {
     width: '90%', 
   },
-
   videoText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -487,19 +408,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     maxWidth: '90%', 
-    
     columnGap: 20,
     rowGap: 5, 
-},
-term: {
+  },
+  term: {
     borderRadius: 5,
     flexShrink: 1,
-},
-termText: {
+  },
+  termText: {
     fontSize: 14,
     color: '#00A3A3',
-},
-
+  },
   videoPlayerContainer: {
     width: '100%',
     aspectRatio: 16 / 9,
@@ -508,15 +427,12 @@ termText: {
     width: '100%',
     height: '100%',
   },
-
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-
-
   closeButton: {
     position: 'absolute',
     top: 10,
@@ -531,15 +447,12 @@ termText: {
     fontSize: 16,
     fontWeight: 'bold',
   },
-  
   container3: {
     backgroundColor: '#fffcec',
     paddingBottom: '10%',
   },
-
   container4: {
     backgroundColor: '#fffcec',
     paddingBottom: '40%',
   },
-
 });
