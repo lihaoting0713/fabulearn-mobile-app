@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons ,Entypo,Octicons,AntDesign} from "@expo/vector-icons";
 import React, { useState, useEffect, useMemo,useCallback,useRef } from "react";
@@ -18,6 +19,9 @@ import BottomNavBar from "../components/BottomNavBar"; // Import the BottomNavBa
 import { SvgUri } from "react-native-svg";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
+
+var width = Dimensions.get('window').width; //full width
+var height = Dimensions.get('window').height; //full height
 
 
 function VideoLibrary({ route }) {
@@ -444,7 +448,7 @@ const deletehashtag = (hashtag) => {
             <TouchableOpacity onPress={() => { 
               setHashtags([])
               setPrevioushashtag(null)
-              navigation.push("PlayVideos",{VIDEOID:item.id,VIDEODATA:item}); 
+              navigation.push("PlayVideos",{VIDEOID:item.id,VIDEOPATH:item.video_path,VIDEODATA:item,}); 
               }}>
               <View style={styles.thumbnail}>
                 <Image source={{ uri: item.thumbnail }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />
@@ -515,9 +519,10 @@ const deletehashtag = (hashtag) => {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>搜尋篩選器</Text>
+            <ScrollView>
             <View style={styles.modalContent}>
               <View style={styles.modalItem}>
-                <Text>排序方式</Text>
+                <Text style={styles.modaltext}>排序方式</Text>
                 <View style={styles.modalselect}>
                   <Picker
                   style={styles.picker}
@@ -534,7 +539,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>科目</Text>
+                <Text style={styles.modaltext}>科目</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -553,7 +558,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>上載日期</Text>
+                <Text style={styles.modaltext}>上載日期</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -572,7 +577,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
               <View style={styles.modalItem}>
-                <Text>片長</Text>
+                <Text style={styles.modaltext}>片長</Text>
                 <View style={styles.modalselect}>
                 <Picker
                   style={styles.picker}
@@ -590,6 +595,7 @@ const deletehashtag = (hashtag) => {
                 </View>
               </View>
             </View>
+            </ScrollView>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.modalButtonNo}
@@ -763,21 +769,19 @@ const styles = StyleSheet.create({
   },
   videoItem: {
     flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
     marginVertical: 10,
-    marginHorizontal: 20,
     padding: 10,
-
   },
   thumbnail: {
-    width: 350,
-    height: 200,
     marginHorizontal: 10,
+    width: width/1.05,
+    height: width*(9/16),
     backgroundColor: "grey", // Placeholder for thumbnail
     borderRadius: 25,
     borderColor: "#D3D3D3",
     borderWidth: 3,
+    alignSelf : "center",
   },
   videotext: {
     marginRight: 30,
@@ -811,7 +815,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 10,
     marginLeft: 10,
-    width: 250,
+    width: width/1.5,
   },
   termsContainer: {
     flexDirection: "row",
@@ -833,6 +837,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: 300,
+    height: 300,
     backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 20,
@@ -851,6 +856,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 10,
+    width: "95%",
+    alignSelf: "center",
+  },
+  modaltext: {
+    alignSelf: "center",
+    fontSize: 16,
   },
   modalselect: {
     flexDirection: "row",
@@ -885,7 +896,7 @@ const styles = StyleSheet.create({
   picker: {
     marginLeft: -40,
     width: 150,
-    marginTop: -15,
+    marginTop: 0,
   },
 });
 

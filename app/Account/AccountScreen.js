@@ -12,10 +12,12 @@ function AccountScreen({navigation}) {
   const logout = async () => {
     try {
       const url = `https://schools.fabulearn.net/api/logout`;
-      const response = await fetch(url
-      );
+      const response = await fetch(url);
+      const testingresponse = await fetch("http://192.168.18.12/api/logout");
       const data = await response.json();
+      const testingdata = await testingresponse.json();
       console.log("logout: ",data);
+      console.log("testing logout: ",testingdata);
       await SecureStore.setItemAsync("isLogin", "false");
       await SecureStore.deleteItemAsync("Logined");
       console.log("isLogin status: ",await SecureStore.getItemAsync("isLogin"));
@@ -70,7 +72,7 @@ function AccountScreen({navigation}) {
 
 
   const [accountlist, setAccountlist] = useState([
-    { text: '設定', id: "setting", icon: 'settings-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('SettingNavigator')},
+    /*{ text: '設定', id: "setting", icon: 'settings-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('SettingNavigator')},*/
     { text: '影片記錄', id: "video_records", icon: 'history', icontype: Octicons, size: 30 , onPress: () => navigation.navigate('VideoRecordsNavigator')},
     { text: '收藏紀錄', id: "collection_records", icon: 'bookmark-outline', icontype: Ionicons, size: 30 , onPress: () => navigation.navigate('CollectionRecordsNavigator')},
     { text: '筆記記錄', id: "note_records", icon: 'note', icontype: SimpleLineIcons, size: 30 , onPress: () => navigation.navigate('NoteRecordsNavigator')},
@@ -97,7 +99,7 @@ function AccountScreen({navigation}) {
             <Image source={require(usericon)} style={styles.usericon} />
           }
           <Text style={styles.username}>{profile? profile.first_name:null} {profile? profile.last_name:null}</Text>
-
+          <View style={styles.flatlistcontainer}>
           <FlatList
             style={styles.list}
             data={accountlist}
@@ -112,6 +114,7 @@ function AccountScreen({navigation}) {
               </View>
             )}
           />
+          </View>
         </View>
         } 
       </ScrollView>
@@ -160,18 +163,20 @@ const styles = StyleSheet.create({
   username: {
     marginTop: 10,
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 10,
     color: '#00A3A3',
   },
   list: {
-    marginTop: 40,
+    marginTop: 10,
     width: '100%',
+  },
+  flatlistcontainer: {
   },
   itemContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 10,
-    marginHorizontal: 30,  
+    marginRight: 60,  
   },
   text: {
     fontSize: 20,

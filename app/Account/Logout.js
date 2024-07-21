@@ -31,13 +31,29 @@ function Logout() {
             },
             body: formdata
             });
+            const testpannelresponse = await fetch("http://192.168.18.12/api/login", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "multipart/form-data;"
+                },
+                body: formdata
+            });
             const data = await response.json();
             console.log(data);
+            const testpanneldata = await testpannelresponse.json();
+            console.log(testpanneldata);
+            setlogin_id('');
+            setPassword('');
             if(data.success === true){
                 console.log("login success")
-                await storelogin("true");
+                let logindata = {
+                    login_id: login_id,
+                    password: password
+                }
+                console.log("logindata:",logindata)
+                await storelogin(JSON.stringify(logindata));
                 console.log("login status: ",await SecureStore.getItemAsync("Logined"))
-                if(SecureStore.getItemAsync("tabID")==null){
+                if(await getStoredTabID()==null){
                     const tabID = generateRandomInteger();
                     console.log("generated:",tabID)
                     await storeTabID(tabID);
@@ -46,6 +62,7 @@ function Logout() {
                 else{
                     console.log("tabID already exists: ",await getStoredTabID())
                 }
+                navigation.navigate('AccountScreen');
                 navigation.navigate('HomeScreen');
             }
             else{
@@ -123,7 +140,7 @@ function Logout() {
 
                     <View style={styles.forgotpwcontainer}>
                         <TouchableOpacity onPress={()=>navigation.navigate("ForgetPassword")}>
-                        <Text style={{textAlign:'right'}}>Forgot password</Text>
+                        <Text style={{textAlign:'right'}}>忘記密碼</Text>
                         </TouchableOpacity>
                     </View>
 
@@ -137,7 +154,7 @@ function Logout() {
                     
                     <View style={styles.createaccontainer}>
                         <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
-                        <Text style={{textAlign:'right'}}>create account</Text>
+                        <Text style={{textAlign:'right'}}>創建帳號</Text>
                         </TouchableOpacity>
                     </View>
 

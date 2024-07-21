@@ -11,6 +11,7 @@ import {
   TextInput,
   Modal,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons ,Entypo,Octicons,AntDesign} from "@expo/vector-icons";
 import React, { useState, useEffect, useMemo,useCallback,useRef } from "react";
@@ -19,6 +20,8 @@ import { SvgUri } from "react-native-svg";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 
+var width = Dimensions.get('window').width; //full width
+var height = Dimensions.get('window').height; //full height
 
 function VideoRecords() {
   const navigation = useNavigation();
@@ -226,7 +229,7 @@ function close() {
                       />
 
                   <View style={styles.titleContainer}>
-                    <Text style={styles.title}>影片庫</Text>
+                    <Text style={styles.title}>影片紀錄</Text>
                   </View>
                   <View style={styles.iconsContainer}>
                     <TouchableOpacity
@@ -258,7 +261,7 @@ function close() {
               navigation.push(
                 "VideoStack",{
                 screen:"PlayVideos",
-                params:{VIDEOID:item.id,VIDEODATA:item}
+                params:{VIDEOID:item.id,VIDEODATA:item,VIDEOPATH:item.video_path}
               })}}>
               <View style={styles.thumbnail}>
                 <Image source={{ uri: item.thumbnail }} style={{ width: "100%", height: "100%", borderRadius: 25 }} />
@@ -324,6 +327,7 @@ function close() {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>搜尋篩選器</Text>
+            <ScrollView>
             <View style={styles.modalContent}>
               <View style={styles.modalItem}>
                 <Text>排序方式</Text>
@@ -399,6 +403,7 @@ function close() {
                 </View>
               </View>
             </View>
+            </ScrollView>
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={styles.modalButtonNo}
@@ -571,21 +576,20 @@ const styles = StyleSheet.create({
   },
   videoItem: {
     flexDirection: "column",
-    alignItems: "center",
     justifyContent: "center",
     marginVertical: 10,
-    marginHorizontal: 20,
     padding: 10,
 
   },
   thumbnail: {
-    width: 350,
-    height: 200,
+    width: width/1.05,
+    height: width*(9/16),
     marginHorizontal: 10,
     backgroundColor: "grey", // Placeholder for thumbnail
     borderRadius: 25,
     borderColor: "#D3D3D3",
     borderWidth: 3,
+    alignSelf: "center",
   },
   videotext: {
     marginRight: 30,
@@ -641,6 +645,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     width: 300,
+    height: 300,
     backgroundColor: "white",
     borderRadius: 10,
     paddingHorizontal: 20,

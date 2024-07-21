@@ -26,11 +26,13 @@ function AccountSetting() {
                         <Text style={styles.title}>帳戶</Text>
                         <View style={{ width: 40}} />
                     </View>
+                    <View>
                     <Image source={require(usericon)} style={styles.usericon} />
                     <View style={styles.editIconContainer}>
                         <TouchableOpacity>
                         <MaterialIcons name="edit" size={30} color="white" />
                         </TouchableOpacity>
+                    </View>
                     </View>
                     <View style={styles.inputContainer}>
                         <Text style={styles.label}>User Name</Text>
@@ -108,8 +110,8 @@ const styles = StyleSheet.create({
         borderRadius: 30,
         padding: 6,
         position: 'absolute',
-        top: 195,
-        right: 120,
+        top: 100,
+        left: 100,
     },
     inputContainer: {
         width: '100%',

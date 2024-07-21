@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
   Modal,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import * as Clipboard from 'expo-clipboard';
 import {Ionicons,Octicons,MaterialCommunityIcons,Entypo,} from "@expo/vector-icons";
@@ -21,7 +22,9 @@ import { useNavigation } from "@react-navigation/native";
 import { SvgUri } from "react-native-svg";
 import {Video} from 'expo-av';
 import * as SecureStore from 'expo-secure-store';
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
+var width = Dimensions.get('window').width; //full width
+var height = Dimensions.get('window').height; //full height
 
 
 function PlayVideos({route}) {
@@ -29,9 +32,10 @@ function PlayVideos({route}) {
   const [isloading, setisloading] = useState(true);
   const { VIDEOID } = route.params;
   const {VIDEODATA} = route.params;
+  const {VIDEOPATH} = route.params;
   const[videoid, setVideoid] = useState(VIDEOID);
   const [featuredVideo, setFeaturedVideo] = useState(VIDEODATA);
-  const videosource = featuredVideo.video_path;
+  const videosource = VIDEOPATH
   const [featuredVideodetails, setFeaturedVideodetails] = useState({});
   const video = React.useRef(null);
   const [isvideoClicked, setisvideoClicked] = useState(false);
@@ -731,18 +735,18 @@ const subjectinchinese = {
                 <View style={{flexDirection:"row"}}>
 
                 <View style={styles.logoandlogotitleLarge}>
-                <SvgUri uri={subjecticon[featuredVideo.subject.toLowerCase()]} style={styles.logoLarge} />
+                <SvgUri uri={subjecticon[featuredVideodetails.subject.toLowerCase()]} style={styles.logoLarge} />
                   <Text style={styles.logotitleLarge}>
-                    {subjectinchinese[featuredVideo.subject.toLowerCase()]}
+                    {subjectinchinese[featuredVideodetails.subject.toLowerCase()]}
                   </Text>
                 </View>
                 <View style={styles.titleandtermLarge}>
                   <Text style={styles.videoTitleLarge}
                   >
-                    {featuredVideo.title}
+                    {featuredVideodetails.title}
                   </Text>
                   <View style={styles.termsContainerLarge}>
-                    {featuredVideo.hashtag.map((term, index) => (
+                    {featuredVideodetails.hashtag.map((term, index) => (
                       <TouchableOpacity key={index} onPress={()=>{
                         console.log("term:",term)
                         navigation.push("VideoLibrary",{PREVIOUSHASHTAG:term})
@@ -756,7 +760,7 @@ const subjectinchinese = {
                 </View>
                 </View>
               </View>
-              <View>
+              <View style={styles.videocontainer}>
               {isvideoClicked ?
                     <Video
                     ref={video}
@@ -770,9 +774,13 @@ const subjectinchinese = {
                     />
                     :
                     <TouchableOpacity onPress={()=>setisvideoClicked(true)}>
-                    <Image source={{ uri: featuredVideo.thumbnail }} style={styles.thumbnailLarge} />
-                    <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={{position:"absolute",top:65,right:125}}/>
-                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideo.duration.string}</Text>
+                      <View style={styles.wholevideocontainer}>
+                    <Image source={{ uri: featuredVideodetails.thumbnail }} style={styles.thumbnailLarge} />
+                    <View style={styles.playbuttoncontainer}>
+                    <Ionicons name="play-circle-outline" size={100} color="#00A3A3" style={styles.playbutton}/>
+                    </View>
+                    </View>
+                  <Text style={{position:"absolute",bottom:0,right:0,backgroundColor:"black",color:"white",padding:5,borderRadius:5}}>{featuredVideodetails.duration.string}</Text>
                     </TouchableOpacity>
               }
               </View>
@@ -1226,9 +1234,12 @@ const styles = StyleSheet.create({
   titleandtermLarge: {
     marginLeft: 10,
   },
+  videocontainer: {
+    alignItems: "center",
+  },
   thumbnailLarge: {
-    width: "100%",
-    height: 200,
+    width: width/1.05,
+    height: width * (9 / 16),
     marginTop: 10,
     borderRadius: 10,
   },
@@ -1265,6 +1276,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     width: "70%",
+  },
+  wholevideocontainer:{
+    width: width/1.05,
+    height: width * (9 / 16),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  playbuttoncontainer:{
+    position: "absolute",
+  },
+  playbutton:{
   },
   buttonContainer: {
     flexDirection: "row",

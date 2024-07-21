@@ -1,5 +1,5 @@
-import React from 'react';
-
+import React ,{useState,useEffect} from 'react';
+import { View, ActivityIndicator,StyleSheet } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AccountScreen from './Account/AccountScreen';
 import Setting from './Account/Setting/Setting';
@@ -13,6 +13,9 @@ import AccountSetting from './Account/Setting/AccountSetting';
 import Password from './Account/Setting/Password';
 import CreateAccount from './Account/CreateAccount';
 import ForgetPassword from './Account/ForgetPassword';
+import * as SecureStore from 'expo-secure-store';
+
+
 
 const MainStack = createNativeStackNavigator();
 const SettingStack = createNativeStackNavigator();
@@ -66,8 +69,26 @@ function LogoutNavigator() {
 
 
 function AccountStack() {
+    const [isLogin, setIsLogin] = useState(null);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      const loginStatus = await SecureStore.getItemAsync("isLogin");
+      setIsLogin(loginStatus === "true");
+    };
+    checkLoginStatus();
+  }, []);
+
+  if (isLogin === null) {
     return (
-            <MainStack.Navigator initialRouteName="AccountScreen" screenOptions={{headerShown:false}}>
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+    return (
+            <MainStack.Navigator screenOptions={{headerShown:false}} initialRouteName={isLogin?"AccountScreen":"LogoutNavigator"}>
                 <MainStack.Screen name="AccountScreen" component={AccountScreen} />
                 <MainStack.Screen name="SettingNavigator" component={SettingNavigator} />
                 <MainStack.Screen name="VideoRecordsNavigator" component={VideoRecordsNavigator} />
@@ -79,5 +100,14 @@ function AccountStack() {
             </MainStack.Navigator>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#fff',
+    },
+  });
 
 export default AccountStack;
