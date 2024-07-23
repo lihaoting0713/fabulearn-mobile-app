@@ -13,7 +13,6 @@ import AccountStack from './AccountStack';
 import ChallengeStack from './ChallengeStack';
 import { VideoProvider } from './VideoContext'; 
 import HomeVideo from './HomeVideo'; 
-
 import * as SecureStore from 'expo-secure-store';
 
 const MainStack = createNativeStackNavigator();

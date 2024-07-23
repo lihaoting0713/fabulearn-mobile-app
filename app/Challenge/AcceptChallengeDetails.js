@@ -181,8 +181,12 @@ const AcceptChallenge = () => {
       
 
       const formatDate = (dateTimeString) => {
+        if (!dateTimeString) {
+          return 'Invalid date'; 
+        }
         return dateTimeString.split(' ')[0];
       };
+      
     
 
     return (

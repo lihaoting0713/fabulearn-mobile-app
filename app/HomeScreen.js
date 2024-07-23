@@ -25,9 +25,38 @@ const HomeScreen = () => {
   const navigation = useNavigation();
   const videoId = useSelector((state) => state.video.videoId);
   const { watchHistoryVideos, fetchHistoryVideos } = useVideoContext();
+
+
+  const fetchTrendingVideo = useCallback(async () => {
+    try {
+      const url = 'https://schools.fabulearn.net/api/bliss/trending-videos';
+      console.log('Fetching trending videos from:', url);
+      const response = await axios.get(url);
+      const data = response.data;
+
+      if (data.success && data.data.length > 0) {
+        const firstTrendingVideoId = data.data[0].id;
+        return firstTrendingVideoId;
+      } else {
+        console.error('Failed to fetch trending videos or no trending videos available');
+        return null;
+      }
+    } catch (error) {
+      console.error('Error fetching trending videos:', error.message);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+      }
+      return null;
+    }
+  }, []);
  
   
   const fetchRecVideos = useCallback(async (videoId) => {
+    if (!videoId) {
+      videoId = await fetchTrendingVideo();
+      if (!videoId) return;
+    }
+
     try {
       const url = `https://schools.fabulearn.net/api/bliss/videos/${videoId}/recommendation`;
       console.log('Making request to:', url); 
@@ -50,11 +79,10 @@ const HomeScreen = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Current videoId from context in HomeScreen:', videoId); 
-    if (videoId) {
-      fetchRecVideos(videoId);
-    }
-  }, [videoId, fetchRecVideos]);
+  console.log('Current videoId from context in HomeScreen:', videoId); 
+  fetchRecVideos(videoId);
+}, [videoId, fetchRecVideos]);
+
 
    useEffect(() => {
     fetchHistoryVideos();

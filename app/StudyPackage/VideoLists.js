@@ -49,7 +49,6 @@ const VideoList = ({ route }) => {
   const [itemsPerPage] = useState(4);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [allLoaded, setAllLoaded] = useState(false);
-
   const [selectedHashtags, setSelectedHashtags] = useState([]);
   const [filteredHashtagVideos, setFilteredHashtagVideos] = useState(videoId);
   const [filteredPage, setFilteredPage] = useState(1);

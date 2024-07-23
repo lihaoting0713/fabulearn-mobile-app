@@ -89,8 +89,6 @@ const VideoPlayer = () => {
     }, [route.params?.videoId]);
 
 
-
-
     const closeVideoPlayer = () => {
       setSelectedVideo(null);
     };
